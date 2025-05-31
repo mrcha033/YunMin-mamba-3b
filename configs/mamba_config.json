@@ -1,0 +1,32 @@
+{
+    "_name_or_path": "YunMin-Mamba-3B",
+    "architectures": ["MambaLMHeadModel"],
+    "hidden_size": 2560,
+    "intermediate_size": 10240,
+    "num_hidden_layers": 36,
+    "max_position_embeddings": 65536,
+    "vocab_size": 96000,
+    "initializer_range": 0.02,
+    "use_cache": true,
+    "pad_token_id": 0,
+    "bos_token_id": 1,
+    "eos_token_id": 2,
+    "tie_word_embeddings": false,
+    "torch_dtype": "float16",
+    "model_type": "mamba",
+    "attn_layernorm": true,
+    "rms_norm_eps": 1e-05,
+    "layer_norm_eps": 1e-05,
+    "residual_in_fp32": true,
+    "mlp_ratio": 2.0,
+    "ssm_cfg": {
+      "dt_rank": "auto",
+      "dt_min": 0.001,
+      "dt_max": 0.1,
+      "act_layer": "silu",
+      "conv_kernel": 4,
+      "expand": 2,
+      "bidirectional": false
+    }
+  }
+  
