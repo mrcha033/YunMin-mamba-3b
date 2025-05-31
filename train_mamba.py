@@ -32,7 +32,7 @@ def main():
     logger.info(f"Accelerator initialized. Device: {accelerator.device}")
 
     # Paths and configs
-    model_config_path = "configs/mamba_config.json"
+    model_config_path = "mamba_config.json"
     dataset_path = "dataset/tagged"
     output_dir = "checkpoints"
     logging_dir = "logs"

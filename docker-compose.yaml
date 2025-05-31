@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  yunmin-mamba-train:
+    build: .
+    container_name: yunmin-mamba-3b
+    runtime: nvidia
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # AWS credentials (for S3 access)
+      - ~/.aws:/root/.aws:ro
+      # Training artifacts
+      - ./${CHECKPOINT_DIR:-checkpoints}:/app/checkpoints
+      - ./${LOG_DIR:-logs}:/app/logs
+      - ./${LOCAL_DATASET_PATH:-dataset}:/app/dataset
+      # Configuration files
+      - ./${CONFIG_DIR:-configs}:/app/configs:ro
+      # Download script
+      - ./download_s3_dataset.sh:/app/download_s3_dataset.sh:ro
+      # Environment file
+      - ./.env:/app/.env:ro
+    ports:
+      - "${TENSORBOARD_PORT:-6006}:6006"  # TensorBoard
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    # Interactive entrypoint with helpful commands
+    entrypoint: /bin/bash
+    command: >
+      -c "
+      echo '🚀 YunMin-Mamba 3B Training Environment Ready!' &&
+      echo '📋 Available Commands:' &&
+      echo '  ./download_s3_dataset.sh - Download dataset from S3' &&
+      echo '  python train_mamba.py - Start training' &&
+      echo '  tensorboard --logdir=/app/logs --host=0.0.0.0 --port=6006 - Start TensorBoard' &&
+      echo '' &&
+      echo '🔍 Quick checks:' &&
+      echo '  nvidia-smi - Check GPU status' &&
+      echo '  aws sts get-caller-identity - Check AWS credentials' &&
+      echo '' &&
+      /bin/bash"
+
+  # Optional: Separate service for data download only
+  data-downloader:
+    build: .
+    container_name: yunmin-data-downloader
+    env_file:
+      - .env
+    volumes:
+      - ~/.aws:/root/.aws:ro
+      - ./${LOCAL_DATASET_PATH:-dataset}:/app/dataset
+      - ./download_s3_dataset.sh:/app/download_s3_dataset.sh:ro
+      - ./.env:/app/.env:ro
+    entrypoint: /bin/bash
+    command: -c "./download_s3_dataset.sh && echo 'Data download completed!'"
+    profiles: ["data"] 
