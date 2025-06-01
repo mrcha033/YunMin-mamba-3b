@@ -33,6 +33,9 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel packaging numpy \
 # 2) 나머지 requirements 설치
 RUN pip install --no-build-isolation --no-cache-dir -r requirements.txt
 
+RUN pip install --no-cache-dir \
+    git+https://github.com/state-spaces/mamba.git
+
 # ========= Accelerate 기본 설정 =========
 RUN mkdir -p "$HF_HOME/accelerate"
 COPY accelerate_config.yaml "$HF_HOME/accelerate/default_config.yaml"
