@@ -9,7 +9,7 @@ echo "🚀 Setting up YunMin-Mamba 3B Training Environment..."
 
 # Create necessary directories
 echo "📁 Creating project directories..."
-mkdir -p checkpoints logs dataset configs
+mkdir -p checkpoints logs dataset
 
 # Copy .env template if .env doesn't exist
 if [ ! -f ".env" ]; then
@@ -58,9 +58,13 @@ else
     echo "⚠️  AWS CLI is not installed. Install it for S3 dataset access."
 fi
 
-# Validate configs directory
-if [ ! -f "configs/mamba_config.json" ]; then
-    echo "⚠️  configs/mamba_config.json not found. Please ensure model config is available."
+# Validate config files
+if [ ! -f "mamba_config.json" ]; then
+    echo "⚠️  mamba_config.json not found. Please ensure model config is available."
+fi
+
+if [ ! -f "accelerate_config.yaml" ]; then
+    echo "⚠️  accelerate_config.yaml not found. Please ensure accelerate config is available."
 fi
 
 echo ""
@@ -68,7 +72,7 @@ echo "🎉 Setup completed!"
 echo ""
 echo "📋 Next steps:"
 echo "  1. Edit .env file to configure your S3 bucket and paths"
-echo "  2. Ensure configs/mamba_config.json exists"
+echo "  2. Ensure mamba_config.json and accelerate_config.yaml exist"
 echo "  3. Run: docker-compose up --build yunmin-mamba-train"
 echo ""
 echo "📚 Documentation: See README.md for detailed usage instructions" 

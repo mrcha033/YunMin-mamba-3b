@@ -2,7 +2,13 @@ version: '3.8'
 
 services:
   yunmin-mamba-train:
-    build: .
+    build: 
+      context: .
+      args:
+        # Customize CUDA version as needed
+        CUDA_VERSION: ${CUDA_VERSION:-12.1.1}
+        CUDNN_VERSION: ${CUDNN_VERSION:-8}
+        UBUNTU_VERSION: ${UBUNTU_VERSION:-22.04}
     container_name: yunmin-mamba-3b
     runtime: nvidia
     env_file:
@@ -17,7 +23,8 @@ services:
       - ./${LOG_DIR:-logs}:/app/logs
       - ./${LOCAL_DATASET_PATH:-dataset}:/app/dataset
       # Configuration files
-      - ./${CONFIG_DIR:-configs}:/app/configs:ro
+      - ./mamba_config.json:/app/configs/mamba_config.json:ro
+      - ./accelerate_config.yaml:/app/accelerate_config.yaml:ro
       # Download script
       - ./download_s3_dataset.sh:/app/download_s3_dataset.sh:ro
       # Environment file
@@ -51,7 +58,12 @@ services:
 
   # Optional: Separate service for data download only
   data-downloader:
-    build: .
+    build: 
+      context: .
+      args:
+        CUDA_VERSION: ${CUDA_VERSION:-12.1.1}
+        CUDNN_VERSION: ${CUDNN_VERSION:-8}
+        UBUNTU_VERSION: ${UBUNTU_VERSION:-22.04}
     container_name: yunmin-data-downloader
     env_file:
       - .env
