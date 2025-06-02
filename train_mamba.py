@@ -3,34 +3,27 @@
 YunMin-Mamba 3B Pretraining Script with Accelerate
 Supports multiple dataset categories with learning order
 """
-import subprocess, os, sys
-
-def ensure_libgfortran():
-    try:
-        # 이미 있으면 아무 일도 안 일어남
-        subprocess.check_call("ldconfig -p | grep libgfortran", shell=True)
-        print("✅ libgfortran already present")
-    except subprocess.CalledProcessError:
-        print("⚠️  libgfortran not found — installing…")
-        subprocess.check_call(["apt-get", "update"])
-        subprocess.check_call(["apt-get", "install", "-y", "libgfortran5"])
-        # optional: 심볼릭 링크 보강
-        subprocess.run("ln -sf $(ldconfig -p | grep libgfortran.so.5 | head -1 | awk '{print $4}') "
-                       "/usr/lib/x86_64-linux-gnu/libgfortran.so", shell=True, check=False)
-
-ensure_libgfortran()
-
 import math
 import torch
 import logging
+import sys
 from pathlib import Path
 from tqdm import tqdm
 from datasets import load_from_disk, concatenate_datasets
 from transformers import AutoTokenizer, AutoConfig, get_scheduler
 from torch.utils.data import DataLoader
-from mamba_ssm.models.mamba_lm import MambaLMHeadModel
 from transformers import DataCollatorForLanguageModeling
 from accelerate import Accelerator
+
+# Add current directory to Python path for mamba_simple import
+sys.path.append('/app')
+sys.path.append('.')
+
+# Updated import for mamba-minimal
+from mamba_simple import Mamba
+
+# Ensure logs directory exists
+Path("logs").mkdir(exist_ok=True)
 
 # Logging setup
 logging.basicConfig(
@@ -42,6 +35,89 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger("yunmin-mamba-train")
+
+# CUDA verification
+def verify_cuda():
+    logger.info("🔍 Verifying CUDA environment...")
+    logger.info(f"PyTorch version: {torch.__version__}")
+    logger.info(f"CUDA available: {torch.cuda.is_available()}")
+    if torch.cuda.is_available():
+        logger.info(f"CUDA version: {torch.version.cuda}")
+        logger.info(f"GPU count: {torch.cuda.device_count()}")
+        for i in range(torch.cuda.device_count()):
+            logger.info(f"GPU {i}: {torch.cuda.get_device_name(i)}")
+    else:
+        logger.warning("CUDA not available - training will be slow!")
+
+# Simple Mamba Language Model wrapper
+class SimpleMambaLM(torch.nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.config = config
+        self.vocab_size = config.vocab_size
+        
+        # Token embeddings
+        self.embedding = torch.nn.Embedding(config.vocab_size, config.d_model)
+        
+        # Mamba layers
+        self.layers = torch.nn.ModuleList([
+            Mamba(config.d_model) for _ in range(config.num_hidden_layers)
+        ])
+        
+        # Layer norm
+        self.norm = torch.nn.LayerNorm(config.d_model)
+        
+        # Language modeling head
+        self.lm_head = torch.nn.Linear(config.d_model, config.vocab_size, bias=False)
+        
+        # Tie weights
+        self.lm_head.weight = self.embedding.weight
+        
+    def forward(self, input_ids, labels=None, **kwargs):
+        # Get embeddings
+        x = self.embedding(input_ids)
+        
+        # Pass through Mamba layers
+        for layer in self.layers:
+            x = layer(x)
+        
+        # Final norm
+        x = self.norm(x)
+        
+        # Get logits
+        logits = self.lm_head(x)
+        
+        loss = None
+        if labels is not None:
+            # Shift labels for causal LM
+            shift_logits = logits[..., :-1, :].contiguous()
+            shift_labels = labels[..., 1:].contiguous()
+            
+            # Calculate loss
+            loss_fn = torch.nn.CrossEntropyLoss()
+            loss = loss_fn(shift_logits.view(-1, self.vocab_size), shift_labels.view(-1))
+        
+        # Return in transformers format
+        from types import SimpleNamespace
+        return SimpleNamespace(loss=loss, logits=logits)
+    
+    def save_pretrained(self, save_directory, **kwargs):
+        """Save model for compatibility"""
+        Path(save_directory).mkdir(parents=True, exist_ok=True)
+        torch.save(self.state_dict(), Path(save_directory) / "pytorch_model.bin")
+        # Save config
+        import json
+        config_dict = {
+            "vocab_size": self.config.vocab_size,
+            "d_model": self.config.d_model,
+            "num_hidden_layers": self.config.num_hidden_layers
+        }
+        with open(Path(save_directory) / "config.json", "w") as f:
+            json.dump(config_dict, f, indent=2)
+    
+    def num_parameters(self):
+        """Count total parameters"""
+        return sum(p.numel() for p in self.parameters())
 
 # Learning order configuration
 LEARNING_ORDER = [
@@ -142,6 +218,9 @@ def train_on_category(accelerator, model, tokenizer, category_dataset, category_
 
 # Main function
 def main():
+    # Verify CUDA first
+    verify_cuda()
+    
     accelerator = Accelerator()
     logger.info(f"Accelerator initialized. Device: {accelerator.device}")
 
@@ -155,14 +234,28 @@ def main():
     Path(logging_dir).mkdir(exist_ok=True)
 
     # Tokenizer
+    logger.info("Loading tokenizer...")
     tokenizer = AutoTokenizer.from_pretrained("mrcha033/YunMin-tokenizer-96k")
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
     # Model
-    config = AutoConfig.from_pretrained(model_config_path, local_files_only=True)
-    model = MambaLMHeadModel(config)
-    logger.info(f"Model initialized with {model.num_parameters()} parameters")
+    logger.info("Loading model config and initializing Mamba model...")
+    import json
+    with open(model_config_path, 'r') as f:
+        config_dict = json.load(f)
+    
+    # Create a simple config object
+    from types import SimpleNamespace
+    config = SimpleNamespace(**config_dict)
+    
+    # Verify mamba-ssm import
+    try:
+        model = SimpleMambaLM(config)
+        logger.info(f"✅ Mamba model initialized successfully with {model.num_parameters()} parameters")
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize Mamba model: {e}")
+        raise
 
     # Data collator
     data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
