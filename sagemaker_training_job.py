@@ -66,7 +66,7 @@ def create_training_job():
     
     # Start training
     print(f"🚀 Starting training job: {job_name}")
-    print(f"📊 Instance type: ml.p4d.24xlarge")
+    print(f"📊 Instance type: ml.g5.24xlarge")
     print(f"🎛️  Hyperparameters: {hyperparameters}")
     print(f"📁 Training data: {train_data_s3}")
     print(f"📤 Output path: {output_path}")
