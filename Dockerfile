@@ -14,7 +14,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PATH=/usr/local/cuda/bin:$PATH \
     LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH \
     TOKENIZERS_PARALLELISM=false \
-    MAX_JOBS=4
+    MAX_JOBS=4 \
+    PYTHONPATH=/app:$PYTHONPATH
 
 # ========= System packages =========
 RUN apt-get update && \
@@ -57,6 +58,7 @@ RUN echo '{\n  "vocab_size": 96000,\n  "d_model": 2560,\n  "num_hidden_layers": 
 
 # ========= Training script =========
 COPY train_mamba.py /app/train_mamba.py
+COPY debug_paths.py /app/debug_paths.py
 
 # ========= Port and working directory =========
 EXPOSE 6006
@@ -69,4 +71,8 @@ RUN python -c "import torch; print('✅ CUDA available:', torch.cuda.is_availabl
 RUN python -c "import sys; sys.path.append('/app'); from train_mamba import SimpleMambaLM; print('✅ SimpleMambaLM imported successfully')"
 
 # ========= Entrypoint =========
-ENTRYPOINT ["python", "train_mamba.py"]
+# Support both SageMaker training job and standalone execution
+COPY debug_entrypoint.sh /app/debug_entrypoint.sh
+RUN chmod +x /app/debug_entrypoint.sh
+
+ENTRYPOINT ["/app/debug_entrypoint.sh"]

@@ -7,6 +7,8 @@ import math
 import torch
 import logging
 import sys
+import os
+import json
 from pathlib import Path
 from tqdm import tqdm
 from datasets import load_from_disk, concatenate_datasets
@@ -106,7 +108,6 @@ class SimpleMambaLM(torch.nn.Module):
         Path(save_directory).mkdir(parents=True, exist_ok=True)
         torch.save(self.state_dict(), Path(save_directory) / "pytorch_model.bin")
         # Save config
-        import json
         config_dict = {
             "vocab_size": self.config.vocab_size,
             "d_model": self.config.d_model,
@@ -172,18 +173,19 @@ def load_dataset_category(dataset_path, category):
     
     return combined_dataset
 
-def train_on_category(accelerator, model, tokenizer, category_dataset, category_name, 
-                     optimizer, lr_scheduler, data_collator, output_dir, step_offset=0):
+def train_on_category(accelerator, model, tokenizer, category_dataset, category, 
+                     optimizer, lr_scheduler, data_collator, output_dir, step_offset, 
+                     batch_size, num_workers, save_steps):
     """Train on a specific dataset category"""
-    logger.info(f"🚀 Starting training on {category_name}...")
+    logger.info(f"🚀 Starting training on {category}...")
     
     # Create DataLoader for this category
     train_dataloader = DataLoader(
         category_dataset, 
         shuffle=True, 
-        batch_size=4, 
+        batch_size=batch_size, 
         collate_fn=data_collator, 
-        num_workers=4
+        num_workers=num_workers
     )
     
     # Prepare with accelerator
@@ -192,7 +194,7 @@ def train_on_category(accelerator, model, tokenizer, category_dataset, category_
     model.train()
     global_step = step_offset
     
-    for step, batch in enumerate(tqdm(train_dataloader, desc=f"Training {category_name}")):
+    for step, batch in enumerate(tqdm(train_dataloader, desc=f"Training {category}")):
         outputs = model(**batch)
         loss = outputs.loss
         accelerator.backward(loss)
@@ -204,16 +206,16 @@ def train_on_category(accelerator, model, tokenizer, category_dataset, category_
         global_step += 1
 
         if global_step % 50 == 0:
-            logger.info(f"[{category_name}] Step {global_step}: loss = {loss.item():.4f}")
+            logger.info(f"[{category}] Step {global_step}: loss = {loss.item():.4f}")
 
-        if global_step % 1000 == 0:
+        if global_step % save_steps == 0:
             unwrapped = accelerator.unwrap_model(model)
-            checkpoint_dir = f"{output_dir}/step-{global_step}-{category_name}"
+            checkpoint_dir = f"{output_dir}/step-{global_step}-{category}"
             unwrapped.save_pretrained(checkpoint_dir, is_main_process=accelerator.is_main_process)
             tokenizer.save_pretrained(checkpoint_dir)
-            logger.info(f"💾 Saved checkpoint at step {global_step} ({category_name})")
+            logger.info(f"💾 Saved checkpoint at step {global_step} ({category})")
     
-    logger.info(f"✅ Completed training on {category_name} (total steps: {global_step - step_offset})")
+    logger.info(f"✅ Completed training on {category} (total steps: {global_step - step_offset})")
     return global_step
 
 # Main function
@@ -224,14 +226,35 @@ def main():
     accelerator = Accelerator()
     logger.info(f"Accelerator initialized. Device: {accelerator.device}")
 
+    # SageMaker paths - Use actual SageMaker standard paths
+    input_path = os.environ.get('SM_CHANNEL_TRAINING', '/opt/ml/input/data/training')
+    model_path = os.environ.get('SM_MODEL_DIR', '/opt/ml/model')  
+    output_path = os.environ.get('SM_OUTPUT_DATA_DIR', '/opt/ml/output')
+    
+    # Hyperparameters (SageMaker provides these)
+    hyperparams_path = "/opt/ml/input/config/hyperparameters.json"
+    hyperparams = {}
+    if os.path.exists(hyperparams_path):
+        with open(hyperparams_path, 'r') as f:
+            hyperparams = json.load(f)
+    
     # Paths and configs
     model_config_path = "configs/mamba_config.json"
-    dataset_path = "dataset/tagged"
-    output_dir = "checkpoints"
+    dataset_path = input_path
+    output_dir = model_path
     logging_dir = "logs"
 
-    Path(output_dir).mkdir(exist_ok=True)
-    Path(logging_dir).mkdir(exist_ok=True)
+    Path(output_dir).mkdir(exist_ok=True, parents=True)
+    Path(logging_dir).mkdir(exist_ok=True, parents=True)
+    Path(output_path).mkdir(exist_ok=True, parents=True)
+
+    # Get hyperparameters with defaults
+    learning_rate = float(hyperparams.get('learning_rate', '5e-5'))
+    batch_size = int(hyperparams.get('batch_size', '4'))
+    num_workers = int(hyperparams.get('num_workers', '4'))
+    save_steps = int(hyperparams.get('save_steps', '1000'))
+    
+    logger.info(f"Hyperparameters: lr={learning_rate}, batch_size={batch_size}, save_steps={save_steps}")
 
     # Tokenizer
     logger.info("Loading tokenizer...")
@@ -241,7 +264,6 @@ def main():
 
     # Model
     logger.info("Loading model config and initializing Mamba model...")
-    import json
     with open(model_config_path, 'r') as f:
         config_dict = json.load(f)
     
@@ -261,7 +283,7 @@ def main():
     data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
     # Optimizer
-    optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5, weight_decay=0.01)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.01)
 
     # Prepare model and optimizer with accelerator
     model, optimizer = accelerator.prepare(model, optimizer)
@@ -280,7 +302,7 @@ def main():
             continue
         
         # Create scheduler for this category
-        num_training_steps = len(DataLoader(category_dataset, batch_size=4))
+        num_training_steps = len(DataLoader(category_dataset, batch_size=batch_size))
         lr_scheduler = get_scheduler(
             name="linear",
             optimizer=optimizer,
@@ -292,15 +314,23 @@ def main():
         # Train on this category
         global_step = train_on_category(
             accelerator, model, tokenizer, category_dataset, category,
-            optimizer, lr_scheduler, data_collator, output_dir, global_step
+            optimizer, lr_scheduler, data_collator, output_dir, global_step, 
+            batch_size, num_workers, save_steps
         )
         
         logger.info(f"🎯 Completed {category}. Total steps so far: {global_step}")
 
-    # Final save
-    accelerator.unwrap_model(model).save_pretrained(f"{output_dir}/final")
-    tokenizer.save_pretrained(f"{output_dir}/final")
-    logger.info("✅ Training complete. Final model saved.")
+    # Final save to SageMaker model directory
+    final_model_path = f"{output_dir}/final"
+    accelerator.unwrap_model(model).save_pretrained(final_model_path)
+    tokenizer.save_pretrained(final_model_path)
+    logger.info(f"✅ Training complete. Final model saved to {final_model_path}")
+    
+    # Copy logs to output directory for SageMaker
+    import shutil
+    if os.path.exists("logs"):
+        shutil.copytree("logs", f"{output_path}/logs", dirs_exist_ok=True)
+        logger.info(f"📋 Logs copied to {output_path}/logs")
 
 if __name__ == "__main__":
     main() 
