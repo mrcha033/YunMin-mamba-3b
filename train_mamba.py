@@ -142,6 +142,20 @@ LEARNING_ORDER = [
     "social_media_data"      # SNS 데이터 - 일상 대화체와 신조어
 ]
 
+def filter_by_length(dataset, tokenizer, max_length=1024):
+    """Filter dataset by sequence length to reduce memory usage"""
+    def is_valid_length(example):
+        if 'input_ids' in example:
+            return len(example['input_ids']) <= max_length
+        elif 'text' in example:
+            tokens = tokenizer.encode(example['text'], add_special_tokens=False)
+            return len(tokens) <= max_length
+        return True
+    
+    filtered = dataset.filter(is_valid_length)
+    logger.info(f"Filtered dataset: {len(dataset)} -> {len(filtered)} examples (max_length={max_length})")
+    return filtered
+
 def load_dataset_category(dataset_path, category):
     """Load a specific dataset category with all its shards"""
     category_path = Path(dataset_path) / category
@@ -303,7 +317,6 @@ def main():
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer, 
         mlm=False,
-        max_length=max_seq_length,
         pad_to_multiple_of=8  # Optimize for tensor cores
     )
 
@@ -325,6 +338,9 @@ def main():
         if category_dataset is None:
             logger.warning(f"Skipping {category} - no valid data found")
             continue
+            
+        # Filter by sequence length to reduce memory usage
+        category_dataset = filter_by_length(category_dataset, tokenizer, max_seq_length)
         
         # Create scheduler for this category
         num_training_steps = len(DataLoader(category_dataset, batch_size=batch_size))
