@@ -41,7 +41,7 @@ def create_training_job():
         s3_data=train_data_s3,
         input_mode='File',
         s3_data_type='S3Prefix',
-        s3_data_distribution_type='FullyReplicated'
+        distribution='FullyReplicated'
     )
     
     # Create estimator
