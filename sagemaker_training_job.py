@@ -27,9 +27,10 @@ def create_training_job():
     # Hyperparameters
     hyperparameters = {
         'learning_rate': '5e-5',
-        'batch_size': '8',          # Adjust based on instance memory
-        'num_workers': '4',
+        'batch_size': '2',          # Further reduced from 4 to 2 for OOM prevention
+        'num_workers': '2',         # Reduced workers to save memory
         'save_steps': '1000',
+        'max_seq_length': '1024',   # Limit sequence length to reduce memory
     }
     
     # Data paths - Using TrainingInput for proper channel mapping

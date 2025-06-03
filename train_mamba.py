@@ -51,6 +51,12 @@ def verify_cuda():
     else:
         logger.warning("CUDA not available - training will be slow!")
 
+def cleanup_memory():
+    """Clean up GPU memory"""
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        torch.cuda.synchronize()
+
 # Simple Mamba Language Model wrapper
 class SimpleMambaLM(torch.nn.Module):
     def __init__(self, config):
@@ -79,9 +85,13 @@ class SimpleMambaLM(torch.nn.Module):
         # Get embeddings
         x = self.embedding(input_ids)
         
-        # Pass through Mamba layers
+        # Pass through Mamba layers with gradient checkpointing
         for layer in self.layers:
-            x = layer(x)
+            if self.training:
+                # Use gradient checkpointing during training to save memory
+                x = torch.utils.checkpoint.checkpoint(layer, x, use_reentrant=False)
+            else:
+                x = layer(x)
         
         # Final norm
         x = self.norm(x)
@@ -214,8 +224,14 @@ def train_on_category(accelerator, model, tokenizer, category_dataset, category,
             unwrapped.save_pretrained(checkpoint_dir, is_main_process=accelerator.is_main_process)
             tokenizer.save_pretrained(checkpoint_dir)
             logger.info(f"💾 Saved checkpoint at step {global_step} ({category})")
+            
+            # Clean up memory after saving
+            cleanup_memory()
     
     logger.info(f"✅ Completed training on {category} (total steps: {global_step - step_offset})")
+    
+    # Clean up memory after completing category
+    cleanup_memory()
     return global_step
 
 # Main function
@@ -250,17 +266,21 @@ def main():
 
     # Get hyperparameters with defaults
     learning_rate = float(hyperparams.get('learning_rate', '5e-5'))
-    batch_size = int(hyperparams.get('batch_size', '4'))
-    num_workers = int(hyperparams.get('num_workers', '4'))
+    batch_size = int(hyperparams.get('batch_size', '2'))  # Reduced default
+    num_workers = int(hyperparams.get('num_workers', '2'))  # Reduced default
     save_steps = int(hyperparams.get('save_steps', '1000'))
+    max_seq_length = int(hyperparams.get('max_seq_length', '1024'))  # Add sequence limit
     
-    logger.info(f"Hyperparameters: lr={learning_rate}, batch_size={batch_size}, save_steps={save_steps}")
+    logger.info(f"Hyperparameters: lr={learning_rate}, batch_size={batch_size}, max_seq_length={max_seq_length}, save_steps={save_steps}")
 
     # Tokenizer
     logger.info("Loading tokenizer...")
     tokenizer = AutoTokenizer.from_pretrained("mrcha033/YunMin-tokenizer-96k")
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
+    
+    # Set max length for tokenizer to limit memory usage
+    tokenizer.model_max_length = max_seq_length
 
     # Model
     logger.info("Loading model config and initializing Mamba model...")
@@ -279,8 +299,13 @@ def main():
         logger.error(f"❌ Failed to initialize Mamba model: {e}")
         raise
 
-    # Data collator
-    data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
+    # Data collator with sequence length limit
+    data_collator = DataCollatorForLanguageModeling(
+        tokenizer=tokenizer, 
+        mlm=False,
+        max_length=max_seq_length,
+        pad_to_multiple_of=8  # Optimize for tensor cores
+    )
 
     # Optimizer
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.01)
