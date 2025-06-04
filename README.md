@@ -19,6 +19,17 @@ YunMin-mamba-3b/
 └── architecture.md
 ```
 
+## Configuration
+
+Copy `example.env` to `.env` and adjust the values for your environment:
+
+```bash
+cp example.env .env
+```
+
+This file defines the dataset paths, training hyperparameters and other
+settings used by the helper scripts.
+
 ## Running a Training Job
 
 1. **Push the Docker image to ECR** (example for Windows PowerShell):
