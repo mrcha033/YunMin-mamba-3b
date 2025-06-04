@@ -23,7 +23,7 @@ conda activate mamba-env
 
 ```bash
 pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 \
-            transformers==4.39.3 tokenizers==0.15.2 \
+            transformers>=4.39.3 tokenizers==0.15.2 \
             huggingface-hub datasets sentencepiece bitsandbytes \
             mamba-ssm==2.2.4 causal-conv1d==1.5.0.post8
 ```
@@ -36,8 +36,7 @@ pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 \
 /home/ec2-user/
 |│
 ├── train_mamba.py                 # main trainer script
-├── configs/
-│   └── mamba_config.json         # Mamba 3B 구성 정의
+├── mamba_config.json            # Mamba 3B 구성 정의
 ├── tokenizer/
 │   └── YunMin-tokenizer-96k/   # from HuggingFace
 ├── dataset/
@@ -115,7 +114,7 @@ args = TrainingArguments(
 ```python
 from transformers import AutoModelForCausalLM
 
-model = AutoModelForCausalLM.from_config("configs/mamba_config.json")
+model = AutoModelForCausalLM.from_config("mamba_config.json")
 ```
 
 ### Task 3.4 — Trainer Run
