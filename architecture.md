@@ -23,7 +23,7 @@ conda activate mamba-env
 
 ```bash
 pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 \
-            transformers==4.39.3 tokenizers==0.15.2 \
+            transformers>=4.39.3 tokenizers==0.15.2 \
             huggingface-hub datasets sentencepiece bitsandbytes \
             mamba-ssm==2.2.4 causal-conv1d==1.5.0.post8
 ```
