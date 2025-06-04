@@ -7,6 +7,7 @@ ARG UBUNTU_VERSION=22.04
 FROM nvidia/cuda:${CUDA_VERSION}-cudnn${CUDNN_VERSION}-devel-ubuntu${UBUNTU_VERSION}
 
 # ========= Environment setup =========
+# Skip building CUDA kernels for Mamba
 ENV DEBIAN_FRONTEND=noninteractive \
     HF_HOME=/root/.cache/huggingface \
     PYTHONUNBUFFERED=1 \
