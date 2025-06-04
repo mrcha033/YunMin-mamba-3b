@@ -15,7 +15,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH \
     TOKENIZERS_PARALLELISM=false \
     MAX_JOBS=4 \
-    PYTHONPATH=/app:$PYTHONPATH
+    PYTHONPATH=/app
 
 # ========= System packages =========
 RUN apt-get update && \
@@ -49,16 +49,20 @@ RUN mkdir -p /app/logs /app/checkpoints /app/configs
 RUN python -c "import torch; print('✅ PyTorch imported successfully')"
 RUN python -c "import sys; sys.path.append('/app'); from mamba_simple import Mamba; print('✅ Mamba imported successfully')"
 
-# ========= Accelerate config =========
-RUN mkdir -p "$HF_HOME/accelerate"
-COPY accelerate_config.yaml "$HF_HOME/accelerate/default_config.yaml"
+# ========= Accelerate configuration =========
+RUN mkdir -p "/root/.cache/huggingface/accelerate"
+COPY accelerate_config.yaml /root/.cache/huggingface/accelerate/default_config.yaml
+COPY deepspeed_config.json /app/deepspeed_config.json
 
 # ========= Create mamba config =========
 RUN echo '{\n  "vocab_size": 96000,\n  "d_model": 2560,\n  "num_hidden_layers": 64,\n  "model_type": "mamba"\n}' > /app/configs/mamba_config.json
 
 # ========= Training script =========
 COPY train_mamba.py /app/train_mamba.py
-COPY debug_paths.py /app/debug_paths.py
+
+# ========= Create SageMaker train script =========
+RUN echo '#!/bin/bash\ncd /app\nexec python train_mamba.py "$@"' > /usr/local/bin/train && \
+    chmod +x /usr/local/bin/train
 
 # ========= Port and working directory =========
 EXPOSE 6006
@@ -70,9 +74,9 @@ RUN python -c "import torch; print('✅ CUDA available:', torch.cuda.is_availabl
 # ========= Test SimpleMambaLM =========
 RUN python -c "import sys; sys.path.append('/app'); from train_mamba import SimpleMambaLM; print('✅ SimpleMambaLM imported successfully')"
 
-# ========= Entrypoint =========
-# Support both SageMaker training job and standalone execution
-COPY debug_entrypoint.sh /app/debug_entrypoint.sh
-RUN chmod +x /app/debug_entrypoint.sh
+# ========= SageMaker entrypoint =========
+ENV SAGEMAKER_PROGRAM=train_mamba.py
+ENV SAGEMAKER_SUBMIT_DIRECTORY=/app
 
-ENTRYPOINT ["/app/debug_entrypoint.sh"]
+# ========= Default entrypoint =========
+CMD ["python", "train_mamba.py"]

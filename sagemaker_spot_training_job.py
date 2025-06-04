@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-SageMaker Training Job Launcher for YunMin-Mamba
-This script creates and starts a SageMaker training job using the custom Docker image.
+SageMaker Spot Training Job Launcher for YunMin-Mamba
+This script creates and starts a SageMaker training job using Spot instances with checkpoint resumption.
 """
 
 import boto3
@@ -38,10 +38,10 @@ def create_ecr_repository(repository_name, region):
         print(f"❌ Error checking ECR repository: {e}")
         return False
 
-def create_training_job():
+def create_spot_training_job():
     # Get account info - use us-east-1 to match S3 bucket region
     account_id = get_account_id()
-    region = 'us-east-1'  # Changed to match S3 bucket region
+    region = 'us-east-1'
     
     # SageMaker session
     sagemaker_session = sagemaker.Session()
@@ -52,27 +52,28 @@ def create_training_job():
         print("❌ Cannot proceed without ECR repository")
         return None
     
-    # IAM role for SageMaker (replace with your actual SageMaker execution role)
+    # IAM role for SageMaker
     role = f"arn:aws:iam::{account_id}:role/yeongjopt-sagemaker-execution-role"
     
     # Training job configuration
-    job_name = f"yunmin-mamba-training-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+    job_name = f"yunmin-mamba-spot-training-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
     
     # ECR image URI - using us-east-1 region
     image_uri = f"{account_id}.dkr.ecr.{region}.amazonaws.com/{repository_name}:latest"
     
-    # Hyperparameters
+    # Hyperparameters for spot training (optimized for interruption handling)
     hyperparameters = {
         'learning_rate': '5e-5',
-        'batch_size': '1',          # Minimum batch size for memory efficiency
+        'batch_size': '1',          # Keep minimal for memory efficiency
         'num_workers': '0',         # No parallel workers to save memory
-        'save_steps': '1000',
-        'max_seq_length': '2048',   # Increased but manageable sequence length
+        'save_steps': '500',        # More frequent saves for spot instances
+        'max_seq_length': '2048',   # Manageable sequence length
     }
     
-    # Data paths - Using TrainingInput for proper channel mapping
+    # Data paths
     train_data_s3 = "s3://yeongjopt-us-east1-bucket/dataset/tagged/"
     output_path = "s3://yeongjopt-us-east1-bucket/yunmin-mamba-outputs/"
+    checkpoint_s3 = "s3://yeongjopt-us-east1-bucket/yunmin-mamba-checkpoints/"
     
     # Configure training input channel
     train_input = TrainingInput(
@@ -82,15 +83,24 @@ def create_training_job():
         distribution='FullyReplicated'
     )
     
-    # Create estimator
+    # Create estimator with Spot instances
     estimator = Estimator(
         image_uri=image_uri,
         role=role,
         instance_count=1,
         instance_type='ml.p4d.24xlarge',  # High-performance GPU instance
-        # instance_type='ml.g4dn.xlarge',  # Alternative for smaller training
-        volume_size=200,                   # Increased EBS volume size
-        max_run=28*24*3600,                  # Max training time (24 hours)
+        volume_size=200,
+        max_run=432000,   # Max training time (7 days)
+        max_wait=432000, # Max wait time including spot delays (14 days)
+        
+        # Spot instance configuration
+        use_spot_instances=True,
+        max_retry_attempts=5,  # Retry on spot interruption
+        
+        # Checkpoint configuration
+        checkpoint_s3_uri=checkpoint_s3,
+        checkpoint_local_path='/opt/ml/checkpoints',
+        
         hyperparameters=hyperparameters,
         environment={
             'SAGEMAKER_PROGRAM': 'train_mamba.py',
@@ -98,14 +108,17 @@ def create_training_job():
         },
         output_path=output_path,
         sagemaker_session=sagemaker_session,
-        base_job_name='yunmin-mamba-training'
+        base_job_name='yunmin-mamba-spot-training'
     )
     
     # Start training
-    print(f"🚀 Starting training job: {job_name}")
+    print(f"🚀 Starting Spot training job: {job_name}")
     print(f"🖼️  Image URI: {image_uri}")
     print(f"🌍 Region: {region}")
+    print(f"💰 Using Spot instances (70-90% cost savings)")
     print(f"📊 Instance type: ml.p4d.24xlarge")
+    print(f"🔄 Auto-resume from latest checkpoint")
+    print(f"💾 Checkpoints: {checkpoint_s3}")
     print(f"🎛️  Hyperparameters: {hyperparameters}")
     print(f"📁 Training data: {train_data_s3}")
     print(f"📤 Output path: {output_path}")
@@ -115,7 +128,7 @@ def create_training_job():
             'training': train_input
         }, job_name=job_name)
         
-        print("✅ Training job submitted successfully!")
+        print("✅ Spot training job submitted successfully!")
         return estimator
     except Exception as e:
         print(f"❌ Failed to start training job: {e}")
@@ -128,7 +141,14 @@ def monitor_training_job(job_name):
     try:
         response = sagemaker_client.describe_training_job(TrainingJobName=job_name)
         status = response['TrainingJobStatus']
+        secondary_status = response.get('SecondaryStatus', 'Unknown')
+        
         print(f"📈 Training job status: {status}")
+        print(f"📊 Secondary status: {secondary_status}")
+        
+        if 'BillableTimeInSeconds' in response:
+            billable_time = response['BillableTimeInSeconds']
+            print(f"💰 Billable time: {billable_time} seconds ({billable_time/3600:.2f} hours)")
         
         if status == 'InProgress':
             print("🔄 Training in progress...")
@@ -139,23 +159,28 @@ def monitor_training_job(job_name):
         elif status == 'Failed':
             print("❌ Training failed!")
             print(f"💥 Failure reason: {response.get('FailureReason', 'Unknown')}")
+        elif status == 'Stopped':
+            print("⏹️ Training was stopped")
             
     except Exception as e:
         print(f"❌ Error monitoring job: {e}")
 
 if __name__ == "__main__":
-    print("🎯 YunMin-Mamba SageMaker Training Job Launcher")
-    print("=" * 50)
+    print("🎯 YunMin-Mamba Spot Training Job Launcher")
+    print("💰 Using Spot instances for cost optimization")
+    print("🔄 Resuming from step 3000 checkpoint")
+    print("=" * 60)
     
-    # Uncomment to create a new training job
-    estimator = create_training_job()
+    # Create and start spot training job
+    estimator = create_spot_training_job()
     
-    # Uncomment to monitor an existing job
-    # job_name = "yunmin-mamba-training-20241202-123456"  # Replace with actual job name
-    # monitor_training_job(job_name)
-    
-    print("\n📋 Next steps:")
-    print("1. Monitor the training job in SageMaker console")
-    print("2. Check CloudWatch logs for detailed progress")
-    print("3. Model artifacts will be saved to S3 output path")
-    print("4. Use the trained model for inference") 
+    if estimator:
+        print("\n📋 Next steps:")
+        print("1. Monitor the training job in SageMaker console")
+        print("2. Check CloudWatch logs for detailed progress")
+        print("3. Checkpoints will be saved every 500 steps")
+        print("4. Training will auto-resume if spot instance is interrupted")
+        print("5. Model artifacts will be saved to S3 output path")
+        print(f"6. Expected cost savings: 70-90% vs on-demand instances")
+    else:
+        print("❌ Failed to create spot training job") 
