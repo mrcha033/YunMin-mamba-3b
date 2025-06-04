@@ -154,8 +154,12 @@ docker run --rm --gpus all \
 # 컨테이너 내부 접속
 docker run -it --rm yunmin-mamba:latest bash
 
-# 모델 로딩 테스트 (Transformers)
-docker run --rm yunmin-mamba:latest python -c "from transformers import MambaLMHeadModel; print('✅ Model can be imported')"
+# 모델 초기화 테스트
+docker run --rm yunmin-mamba:latest python -c "
+from transformers import AutoConfig, AutoModelForCausalLM
+AutoModelForCausalLM.from_config(AutoConfig.from_pretrained('configs/mamba_config.json'))
+print('✅ Model can be imported')
+"
 ```
 
 ## 📋 Monitoring

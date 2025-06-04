@@ -12,18 +12,12 @@ import json
 from pathlib import Path
 from tqdm import tqdm
 from datasets import load_from_disk, concatenate_datasets
-from transformers import AutoTokenizer, AutoConfig, get_scheduler
+from transformers import AutoTokenizer, AutoConfig, AutoModelForCausalLM, get_scheduler
 from torch.utils.data import DataLoader
 from transformers import DataCollatorForLanguageModeling
 from accelerate import Accelerator
 import numpy as np
 
-# Add current directory to Python path for mamba_simple import
-sys.path.append('/app')
-sys.path.append('.')
-
-# Updated import for mamba-minimal
-from mamba_simple import Mamba
 
 # Ensure logs directory exists
 Path("logs").mkdir(exist_ok=True)
@@ -61,78 +55,6 @@ def cleanup_memory():
         import gc
         gc.collect()
 
-# Simple Mamba Language Model wrapper
-class SimpleMambaLM(torch.nn.Module):
-    def __init__(self, config):
-        super().__init__()
-        self.config = config
-        self.vocab_size = config.vocab_size
-        
-        # Token embeddings
-        self.embedding = torch.nn.Embedding(config.vocab_size, config.d_model)
-        
-        # Mamba layers
-        self.layers = torch.nn.ModuleList([
-            Mamba(config.d_model) for _ in range(config.num_hidden_layers)
-        ])
-        
-        # Layer norm
-        self.norm = torch.nn.LayerNorm(config.d_model)
-        
-        # Language modeling head
-        self.lm_head = torch.nn.Linear(config.d_model, config.vocab_size, bias=False)
-        
-        # Tie weights
-        self.lm_head.weight = self.embedding.weight
-        
-    def forward(self, input_ids, labels=None, **kwargs):
-        # Get embeddings
-        x = self.embedding(input_ids)
-        
-        # Pass through Mamba layers with gradient checkpointing
-        for layer in self.layers:
-            if self.training:
-                # Use gradient checkpointing during training to save memory
-                x = torch.utils.checkpoint.checkpoint(layer, x, use_reentrant=False)
-            else:
-                x = layer(x)
-        
-        # Final norm
-        x = self.norm(x)
-        
-        # Get logits
-        logits = self.lm_head(x)
-        
-        loss = None
-        if labels is not None:
-            # Shift labels for causal LM
-            shift_logits = logits[..., :-1, :].contiguous()
-            shift_labels = labels[..., 1:].contiguous()
-            
-            # Calculate loss
-            loss_fn = torch.nn.CrossEntropyLoss()
-            loss = loss_fn(shift_logits.view(-1, self.vocab_size), shift_labels.view(-1))
-        
-        # Return in transformers format
-        from types import SimpleNamespace
-        return SimpleNamespace(loss=loss, logits=logits)
-    
-    def save_pretrained(self, save_directory, **kwargs):
-        """Save model for compatibility"""
-        Path(save_directory).mkdir(parents=True, exist_ok=True)
-        torch.save(self.state_dict(), Path(save_directory) / "pytorch_model.bin")
-        # Save config
-        config_dict = {
-            "vocab_size": self.config.vocab_size,
-            "d_model": self.config.d_model,
-            "num_hidden_layers": self.config.num_hidden_layers
-        }
-        with open(Path(save_directory) / "config.json", "w") as f:
-            json.dump(config_dict, f, indent=2)
-    
-    def num_parameters(self):
-        """Count total parameters"""
-        return sum(p.numel() for p in self.parameters())
 
 # Learning order configuration
 LEARNING_ORDER = [
@@ -569,24 +491,19 @@ def main():
     logger.info(f"Tokenizer loaded. Vocab size: {tokenizer.vocab_size}")
 
     # Model
-    logger.info("Loading model config and initializing Mamba model...")
-    with open(model_config_path, 'r') as f:
-        config_dict = json.load(f)
-    
-    # Create a simple config object
-    from types import SimpleNamespace
-    config = SimpleNamespace(**config_dict)
-    
-    # Verify mamba-ssm import
+    logger.info("Loading model config and initializing Mamba model via transformers...")
+    config = AutoConfig.from_pretrained(model_config_path)
     try:
-        model = SimpleMambaLM(config)
-        
+        model = AutoModelForCausalLM.from_config(config)
+
         # Enable gradient checkpointing for memory efficiency
         if hasattr(model, 'gradient_checkpointing_enable'):
             model.gradient_checkpointing_enable()
-        
-        logger.info(f"✅ Mamba model initialized successfully with {model.num_parameters()} parameters")
-        logger.info(f"🔧 Gradient checkpointing enabled for memory efficiency")
+
+        logger.info(
+            f"✅ Mamba model initialized successfully with {sum(p.numel() for p in model.parameters())} parameters"
+        )
+        logger.info("🔧 Gradient checkpointing enabled for memory efficiency")
     except Exception as e:
         logger.error(f"❌ Failed to initialize Mamba model: {e}")
         raise
