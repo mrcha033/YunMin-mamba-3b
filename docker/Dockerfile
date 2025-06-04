@@ -15,6 +15,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH \
     TOKENIZERS_PARALLELISM=false \
     MAX_JOBS=4 \
+    MAMBA_SKIP_CUDA_BUILD=1 \
     PYTHONPATH=/app
 
 # ========= System packages =========
