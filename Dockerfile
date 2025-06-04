@@ -55,7 +55,7 @@ COPY accelerate_config.yaml /root/.cache/huggingface/accelerate/default_config.y
 COPY deepspeed_config.json /app/deepspeed_config.json
 
 # ========= Create mamba config =========
-RUN echo '{\n  "vocab_size": 96000,\n  "d_model": 2560,\n  "num_hidden_layers": 64,\n  "model_type": "mamba"\n}' > /app/configs/mamba_config.json
+COPY mamba_config.json /app/mamba_config.json
 
 # ========= Training script =========
 COPY train_mamba.py /app/train_mamba.py
@@ -76,7 +76,7 @@ RUN python - <<'PY'
 import json
 from pathlib import Path
 from transformers import MambaLMHeadModel, MambaConfig
-cfg = json.load(open(Path('/app/configs/mamba_config.json')))
+cfg = json.load(open(Path('/app/mamba_config.json')))
 model = MambaLMHeadModel(MambaConfig(**cfg))
 print('✅ MambaLMHeadModel instantiated successfully')
 PY
