@@ -38,10 +38,10 @@ RUN pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url h
 
 # 3) Install base deps
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir mamba-ssm==2.2.4 transformers==4.40.2
+RUN pip install --no-cache-dir mamba-ssm==2.2.4 transformers>=4.39.3
 
 # 4) Create necessary directories
-RUN mkdir -p /app/logs /app/checkpoints /app/configs
+RUN mkdir -p /app/logs /app/checkpoints
 
 # 5) Verify installation
 RUN python -c "import torch; print('✅ PyTorch imported successfully')"
