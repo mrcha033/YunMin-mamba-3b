@@ -3,16 +3,14 @@
 YunMin-Mamba 3B Pretraining Script with Accelerate
 Supports multiple dataset categories with learning order
 """
-import math
 import torch
 import logging
-import sys
 import os
 import json
 from pathlib import Path
 from tqdm import tqdm
 from datasets import load_from_disk, concatenate_datasets
-from transformers import AutoTokenizer, AutoConfig, AutoModelForCausalLM, get_scheduler
+from transformers import AutoTokenizer, AutoConfig, AutoModelForCausalLM
 from torch.utils.data import DataLoader
 from transformers import DataCollatorForLanguageModeling
 from accelerate import Accelerator
