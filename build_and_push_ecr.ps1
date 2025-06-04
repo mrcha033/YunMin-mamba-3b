@@ -14,7 +14,7 @@ Write-Host "🚀 Building and pushing Docker image to ECR..." -ForegroundColor G
 try {
     $ACCOUNT_ID = (aws sts get-caller-identity --query Account --output text)
     $IMAGE_URI = "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPOSITORY_NAME`:$IMAGE_TAG"
-    
+
     Write-Host "Account ID: $ACCOUNT_ID" -ForegroundColor Cyan
     Write-Host "Region: $REGION" -ForegroundColor Cyan
     Write-Host "Repository: $REPOSITORY_NAME" -ForegroundColor Cyan
@@ -78,4 +78,4 @@ try {
 }
 
 Write-Host "🎉 Docker image is ready! You can now run the SageMaker training job." -ForegroundColor Green
-Write-Host "💡 Next step: python sagemaker_training_job.py" -ForegroundColor Yellow 
+Write-Host "💡 Next step: python sagemaker_training_job.py" -ForegroundColor Yellow
