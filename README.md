@@ -12,7 +12,7 @@ YunMin-mamba-3b/
 ├── train_mamba.py            # Main training script executed in SageMaker
 ├── accelerate_config.yaml    # HuggingFace Accelerate configuration
 ├── configs/
-│   └── mamba_config.json     # Model configuration
+│   └── mamba_config.json     # Model configuration (configs/mamba_config.json)
 ├── deepspeed_config.json     # Deepspeed configuration
 ├── sagemaker_training_job.py # Launch standard SageMaker training
 ├── sagemaker_spot_training_job.py # Launch Spot training job

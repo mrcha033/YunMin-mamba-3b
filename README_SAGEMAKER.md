@@ -78,7 +78,7 @@ SageMaker 훈련 작업에서 다음 하이퍼파라미터를 설정할 수 있�
 
 ### Model Configuration
 
-`mamba_config.json`:
+`configs/mamba_config.json`:
 ```json
 {
   "vocab_size": 96000,
