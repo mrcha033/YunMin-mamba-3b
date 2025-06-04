@@ -9,15 +9,21 @@
 - **Training**: Multi-category curriculum learning
 - **Platform**: Amazon SageMaker Training Jobs
 
-## 📦 Files Overview
+## 📂 Project Structure
 
-- `Dockerfile`: SageMaker 호환 Docker 이미지
-- `train_mamba.py`: 메인 훈련 스크립트
+- `docker/Dockerfile`: SageMaker 호환 Docker 이미지
+- `src/train_mamba.py`: 메인 훈련 스크립트
 - `build_and_push_ecr.ps1`: ECR 푸시 스크립트 (Windows PowerShell 예시)
-- `sagemaker_spot_training_job.py`: Spot 인스턴스용 훈련 작업 스크립트
-- `sagemaker_training_job.py`: SageMaker 훈련 작업 실행 스크립트
+- `sagemaker/sagemaker_spot_training_job.py`: Spot 인스턴스용 훈련 작업 스크립트
+- `sagemaker/sagemaker_training_job.py`: SageMaker 훈련 작업 실행 스크립트
 - `requirements.txt`: Python 의존성
-- `accelerate_config.yaml`: Hugging Face Accelerate 설정
+- `configs/accelerate_config.yaml`: Hugging Face Accelerate 설정
+- `configs/deepspeed_config.json`: DeepSpeed 설정
+- `configs/mamba_config.json`: 3B 모델 설정
+- `configs/mamba_7b_config.json`: 7B 모델 설정
+- `tests/test_imports.py`: 단순 모듈 검증용 테스트
+
+`MODEL_CONFIG_PATH` 환경 변수를 `configs/mamba_config.json` 또는 `configs/mamba_7b_config.json`으로 설정하면 3B와 7B 중 원하는 모델을 선택할 수 있습니다.
 
 ## 🚀 Quick Start
 
@@ -27,8 +33,9 @@
 # AWS CLI 설정 확인
 aws sts get-caller-identity
 
-# ECR에 이미지 빌드 및 푸시 (Windows PowerShell 기준)
-./build_and_push_ecr.ps1
+docker build -t <your-image> .
+docker tag <your-image> <ECR_URI>
+docker push <ECR_URI>
 ```
 
 ### 2. 데이터 준비
@@ -54,7 +61,7 @@ s3://your-bucket/yunmin-mamba-data/dataset/tagged/
 
 ```python
 # sagemaker_training_job.py 수정 후 실행
-python sagemaker_training_job.py
+python sagemaker/sagemaker_training_job.py
 ```
 
 ## ⚙️ Configuration

@@ -93,8 +93,9 @@ def create_training_job():
         max_run=28*24*3600,                  # Max training time (28-day limit)
         hyperparameters=hyperparameters,
         environment={
-            'SAGEMAKER_PROGRAM': 'train_mamba.py',
+            'SAGEMAKER_PROGRAM': 'src/train_mamba.py',
             'SAGEMAKER_SUBMIT_DIRECTORY': '/app',
+            'MODEL_CONFIG_PATH': 'configs/mamba_config.json',
         },
         output_path=output_path,
         sagemaker_session=sagemaker_session,

@@ -8,23 +8,35 @@ YunMin‑Mamba 3B is an open 2.8B parameter language model based on the [Mamba a
 
 ```
 YunMin-mamba-3b/
-├── Dockerfile                # Base image for SageMaker training
+├── docker/
+│   └── Dockerfile            # Base image for SageMaker training
 ├── build_and_push_ecr.ps1    # Example script to push the image to ECR
 ├── requirements.txt          # Python dependencies
-├── train_mamba.py            # Main training script executed in SageMaker
-├── accelerate_config.yaml    # HuggingFace Accelerate configuration
+├── src/
+│   └── train_mamba.py        # Main training script executed in SageMaker
 ├── configs/
-│   └── mamba_config.json     # Model configuration (configs/mamba_config.json)
-├── deepspeed_config.json     # Deepspeed configuration
-├── sagemaker_training_job.py # Launch standard SageMaker training
-├── sagemaker_spot_training_job.py # Launch Spot training job
+│   ├── accelerate_config.yaml  # HuggingFace Accelerate configuration
+│   ├── deepspeed_config.json   # Deepspeed configuration
+│   ├── mamba_config.json       # 3B model configuration
+│   └── mamba_7b_config.json    # 7B model configuration
+├── sagemaker/
+│   ├── sagemaker_training_job.py       # Launch standard SageMaker training
+│   └── sagemaker_spot_training_job.py  # Launch Spot training job
+├── tests/
+│   └── test_imports.py         # Simple import test
+├── .github/workflows/
+│   └── python-tests.yml        # CI workflow
 ├── README_SAGEMAKER.md       # Detailed SageMaker instructions
 └── architecture.md
 ```
 
+Set the `MODEL_CONFIG_PATH` environment variable to point to either
+`configs/mamba_config.json` or `configs/mamba_7b_config.json` to choose which model size
+to train.
+
 ## Model Architecture
 
-The configuration file `configs/mamba_config.json` defines a 36‑layer Mamba-based model with 2,560 hidden units and a vocabulary of 96k tokens.  Gradient checkpointing and DeepSpeed ZeRO Stage 2 are enabled during training to keep GPU memory usage manageable.  See [architecture.md](architecture.md) for the original training plan.
+The configuration file `configs/mamba_config.json` defines the 3B model with 36 layers and a hidden size of 2,560.  A larger 7B variant is provided in `configs/mamba_7b_config.json` with 32 layers and a hidden size of 4,096.  Gradient checkpointing and DeepSpeed ZeRO Stage 2 are enabled during training to keep GPU memory usage manageable.  See [architecture.md](architecture.md) for the original training plan.
 
 ## Dataset Layout
 
@@ -46,30 +58,25 @@ For a full walkthrough in Korean, refer to [README_SAGEMAKER.md](README_SAGEMAKE
 
 ## Configuration
 
-Copy `example.env` to `.env` and adjust the values for your environment:
-
-```bash
-cp example.env .env
-```
-
-This file defines the dataset paths, training hyperparameters and other
-settings used by the helper scripts.
+Create a `.env` file and define the dataset paths, training hyperparameters and other settings used by the helper scripts.
 
 ## Running a Training Job
 
-1. **Push the Docker image to ECR** (example for Windows PowerShell):
+1. **Push the Docker image to ECR**:
 
-   ```powershell
+   ```bash
    aws sts get-caller-identity
-   ./build_and_push_ecr.ps1
+   docker build -t <your-image> .
+   docker tag <your-image> <ECR_URI>
+   docker push <ECR_URI>
    ```
 
-   Ensure that the resulting ECR URI is reflected in `sagemaker_spot_training_job.py` or `sagemaker_training_job.py`.
+   Ensure that the resulting ECR URI is reflected in `sagemaker/sagemaker_spot_training_job.py` or `sagemaker/sagemaker_training_job.py`.
 
 2. **Start the job on SageMaker**:
 
    ```bash
-   python sagemaker_spot_training_job.py
+   python sagemaker/sagemaker_spot_training_job.py
    ```
 
    The script creates a training job using Spot instances and resumes from the latest checkpoint when interrupted.
@@ -113,7 +120,6 @@ pytest
 Additional usage notes and a detailed walkthrough of the SageMaker workflow are available in:
 
 - [README_SAGEMAKER.md](README_SAGEMAKER.md) – Korean quick start and troubleshooting guide
-- [architecture.md](architecture.md) – original training plan and environment setup
 
 ## License
 
