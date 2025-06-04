@@ -13,7 +13,6 @@
 
 - `Dockerfile`: SageMaker 호환 Docker 이미지
 - `train_mamba.py`: 메인 훈련 스크립트
-- `build_and_push_ecr.ps1`: ECR 푸시 스크립트 (Windows PowerShell 예시)
 - `sagemaker_spot_training_job.py`: Spot 인스턴스용 훈련 작업 스크립트
 - `sagemaker_training_job.py`: SageMaker 훈련 작업 실행 스크립트
 - `requirements.txt`: Python 의존성
@@ -27,8 +26,9 @@
 # AWS CLI 설정 확인
 aws sts get-caller-identity
 
-# ECR에 이미지 빌드 및 푸시 (Windows PowerShell 기준)
-./build_and_push_ecr.ps1
+docker build -t <your-image> .
+docker tag <your-image> <ECR_URI>
+docker push <ECR_URI>
 ```
 
 ### 2. 데이터 준비
