@@ -216,8 +216,8 @@ def load_dataset_category(dataset_path, category):
     
     return combined_dataset
 
-def train_on_category(accelerator, model, tokenizer, category_dataset, category, 
-                     optimizer_params, lr_scheduler, data_collator, output_dir, step_offset, 
+def train_on_category(accelerator, model, tokenizer, category_dataset, category,
+                     optimizer_params, lr_scheduler, data_collator, checkpoint_root, step_offset,
                      batch_size, num_workers, save_steps):
     """Train on a specific dataset category with DeepSpeed ZeRO optimization"""
     logger.info(f"🚀 Starting training on {category}...")
@@ -258,7 +258,7 @@ def train_on_category(accelerator, model, tokenizer, category_dataset, category,
             logger.info(f"[{category}] Step {global_step}: loss = {loss.item():.4f}")
 
         if global_step % save_steps == 0:
-            checkpoint_dir = f"{output_dir}/step-{global_step}-{category}"
+            checkpoint_dir = f"{checkpoint_root}/step-{global_step}-{category}"
             # Use accelerator's save method for DeepSpeed
             accelerator.save_state(checkpoint_dir)
             tokenizer.save_pretrained(checkpoint_dir)
@@ -490,10 +490,14 @@ def main():
     # Paths and configs
     model_config_path = "configs/mamba_config.json"
     dataset_path = input_path
-    output_dir = model_path
+
+    # Separate directories for checkpoints and final model
+    checkpoint_root = os.environ.get('SM_CHECKPOINT_DIR', '/opt/ml/checkpoints')
+    model_dir = model_path
     logging_dir = "logs"
 
-    Path(output_dir).mkdir(exist_ok=True, parents=True)
+    Path(checkpoint_root).mkdir(exist_ok=True, parents=True)
+    Path(model_dir).mkdir(exist_ok=True, parents=True)
     Path(logging_dir).mkdir(exist_ok=True, parents=True)
     Path(output_path).mkdir(exist_ok=True, parents=True)
 
@@ -509,7 +513,7 @@ def main():
     start_step = 0
     
     # SageMaker automatically restores checkpoints to /opt/ml/checkpoints
-    ckpt_dir = Path("/opt/ml/checkpoints")
+    ckpt_dir = Path(checkpoint_root)
     if ckpt_dir.exists() and any(ckpt_dir.iterdir()):
         # Find all checkpoint directories
         checkpoints = sorted([d for d in ckpt_dir.iterdir() if d.is_dir() and d.name.startswith('step-')], 
@@ -626,14 +630,14 @@ def main():
         # Train on this category
         global_step = train_on_category(
             accelerator, model, tokenizer, category_dataset, category,
-            None, lr_scheduler, data_collator, output_dir, global_step, 
+            None, lr_scheduler, data_collator, checkpoint_root, global_step,
             batch_size, num_workers, save_steps
         )
         
         logger.info(f"🎯 Completed {category}. Total steps so far: {global_step}")
 
     # Final save to SageMaker model directory using Accelerator
-    final_model_path = f"{output_dir}/final"
+    final_model_path = f"{model_dir}/final"
     accelerator.save_state(final_model_path)
     tokenizer.save_pretrained(final_model_path)
     logger.info(f"✅ Training complete. Final model saved to {final_model_path}")
