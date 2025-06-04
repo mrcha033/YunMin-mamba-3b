@@ -81,6 +81,10 @@ includes dataset paths, S3 output locations and common hyperparameters such as
 
 1. **Push the Docker image to ECR**:
 
+   The Dockerfile already sets `MAMBA_SKIP_CUDA_BUILD=1`, so the Mamba CUDA
+   kernels are skipped automatically. You can build the image even on a
+   CPU‑only machine.
+
    ```bash
    aws sts get-caller-identity
    docker build -f docker/Dockerfile -t <your-image> .

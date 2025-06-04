@@ -53,6 +53,10 @@ docker tag <your-image> <ECR_URI>
 docker push <ECR_URI>
 ```
 
+Dockerfile 내부에서 `MAMBA_SKIP_CUDA_BUILD=1`이 설정되어 있어 CUDA 커널
+빌드를 자동으로 건너뜁니다. 따라서 GPU가 없는 환경에서도 이미지를 빌드할
+수 있습니다.
+
 ### 2. 데이터 준비
 
 S3에 다음 구조로 데이터를 업로드하세요:
