@@ -39,3 +39,7 @@ YunMin-mamba-3b/
    The script creates a training job using Spot instances and resumes from the latest checkpoint when interrupted.
 
 For additional configuration options and dataset layout, see [README_SAGEMAKER.md](README_SAGEMAKER.md).
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
