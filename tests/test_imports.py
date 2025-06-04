@@ -12,7 +12,6 @@ def test_compile_train_mamba():
 
 def test_mamba_lmheadmodel_instantiation():
     """Instantiate ``MambaLMHeadModel`` from the provided config."""
-    import json
     import pytest
 
     try:
