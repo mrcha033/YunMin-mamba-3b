@@ -7,7 +7,7 @@ YunMin‑Mamba 3B is an open 2.8B parameter language model based on the [Mamba a
 ## Project Structure
 
 ```
-YunMin-mamba-3b/
+YunMin-mamba-training/
 ├── docker/
 │   └── Dockerfile            # Base image for SageMaker training
 ├── build_and_push_ecr.ps1    # Example script to push the image to ECR
