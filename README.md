@@ -61,12 +61,14 @@ running `pytest`.
 
 ## Running Tests
 
-Install the minimal dependencies required for the unit tests:
+Install the dependencies used by the unit tests:
 
 ```bash
-pip install transformers mamba-ssm
+MAMBA_SKIP_CUDA_BUILD=1 pip install -r requirements.txt
+pip install pytest
 ```
 
+This installs packages like `transformers`, `mamba-ssm` and `dockerfile-parse`.
 Then run the test suite with `pytest`:
 
 ```bash
