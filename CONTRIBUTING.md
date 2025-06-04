@@ -10,9 +10,12 @@ Before executing `pytest`, install `transformers`, `mamba-ssm`, and `dockerfile-
 ```bash
 pip install transformers mamba-ssm dockerfile-parse
 ```
+You will also need `pytest` and the libraries listed in `requirements.txt` to run the full test suite. If `nvcc` is not available on your
+system, set `MAMBA_SKIP_CUDA_BUILD=1` when installing these dependencies so the CUDA kernels are skipped:
 
-You will also need `pytest` and the libraries listed in `requirements.txt` to run the full test suite.  The easiest
-way is to install everything at once:
+```bash
+MAMBA_SKIP_CUDA_BUILD=1 pip install -r requirements.txt
+```
 
 ```bash
 MAMBA_SKIP_CUDA_BUILD=1 pip install -r requirements.txt
