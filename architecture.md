@@ -36,7 +36,8 @@ pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 \
 /home/ec2-user/
 |│
 ├── train_mamba.py                 # main trainer script
-├── mamba_config.json            # Mamba 3B 구성 정의
+├── configs/
+│   └── mamba_config.json            # Mamba 3B 구성 정의
 ├── tokenizer/
 │   └── YunMin-tokenizer-96k/   # from HuggingFace
 ├── dataset/
@@ -45,7 +46,7 @@ pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 \
     └── train.log
 ```
 
-### Task 1.2 — 형식 설정 `mamba_config.json`
+### Task 1.2 — 형식 설정 `configs/mamba_config.json`
 
 * hidden\_dim: 3072
 * intermediate\_size: 8192
@@ -114,7 +115,7 @@ args = TrainingArguments(
 ```python
 from transformers import AutoModelForCausalLM
 
-model = AutoModelForCausalLM.from_config("mamba_config.json")
+model = AutoModelForCausalLM.from_config("configs/mamba_config.json")
 ```
 
 ### Task 3.4 — Trainer Run
