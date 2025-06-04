@@ -51,6 +51,20 @@ settings used by the helper scripts.
 
 For additional configuration options and dataset layout, see [README_SAGEMAKER.md](README_SAGEMAKER.md).
 
+## Running Tests
+
+Install the minimal dependencies required for the unit tests:
+
+```bash
+pip install transformers mamba-ssm
+```
+
+Then run the test suite with `pytest`:
+
+```bash
+pytest
+```
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
