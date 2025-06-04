@@ -20,7 +20,7 @@ YunMin-mamba-training/
 ├── configs/
 │   ├── accelerate_config.yaml
 │   ├── deepspeed_config.json
-│   ├── mamba_config.json
+│   ├── mamba_3b_config.json
 │   └── mamba_7b_config.json
 ├── sagemaker/
 │   ├── sagemaker_training_job.py
@@ -36,8 +36,8 @@ YunMin-mamba-training/
 `TRAIN_DATA_S3`, `OUTPUT_PATH_S3`, `CHECKPOINT_S3`, `LEARNING_RATE` 등
 필요한 값을 수정하세요.
 
-`MODEL_CONFIG_PATH` 환경 변수를 `configs/mamba_3b.json` 또는
-`configs/mamba_7b.json`으로 설정하면 3B와 7B 중 원하는 모델을 선택할 수
+`MODEL_CONFIG_PATH` 환경 변수를 `configs/mamba_3b_config.json` 또는
+`configs/mamba_7b_config.json`으로 설정하면 3B와 7B 중 원하는 모델을 선택할 수
 있습니다.
 
 ## 🚀 Quick Start
