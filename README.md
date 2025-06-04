@@ -11,7 +11,8 @@ YunMin-mamba-3b/
 ├── requirements.txt          # Python dependencies
 ├── train_mamba.py            # Main training script executed in SageMaker
 ├── accelerate_config.yaml    # HuggingFace Accelerate configuration
-├── mamba_config.json         # Model configuration
+├── configs/
+│   └── mamba_config.json     # Model configuration
 ├── deepspeed_config.json     # Deepspeed configuration
 ├── sagemaker_training_job.py # Launch standard SageMaker training
 ├── sagemaker_spot_training_job.py # Launch Spot training job
@@ -57,6 +58,20 @@ If you want to run the test suite or make changes to this project, see
 [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. The guide explains how to
 install optional dependencies like `transformers` and `mamba-ssm` before
 running `pytest`.
+
+## Running Tests
+
+Install the minimal dependencies required for the unit tests:
+
+```bash
+pip install transformers mamba-ssm
+```
+
+Then run the test suite with `pytest`:
+
+```bash
+pytest
+```
 
 ## License
 

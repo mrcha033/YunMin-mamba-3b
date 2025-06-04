@@ -11,7 +11,11 @@ Before executing `pytest`, install `transformers` and `mamba-ssm`:
 pip install transformers mamba-ssm
 ```
 
-After installing the dependencies, run the test suite from the repository root:
+You will also need `pytest` and the libraries listed in `requirements.txt` to run the full test suite.
+
+## Running Tests
+
+After installing the dependencies, execute:
 
 ```bash
 pytest

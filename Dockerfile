@@ -38,10 +38,10 @@ RUN pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url h
 
 # 3) Install base deps
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir mamba-ssm==2.2.4 transformers==4.40.2
+RUN pip install --no-cache-dir mamba-ssm==2.2.4 transformers>=4.39.3
 
 # 4) Create necessary directories
-RUN mkdir -p /app/logs /app/checkpoints /app/configs
+RUN mkdir -p /app/logs /app/checkpoints
 
 # 5) Verify installation
 RUN python -c "import torch; print('✅ PyTorch imported successfully')"
@@ -55,7 +55,7 @@ COPY accelerate_config.yaml /root/.cache/huggingface/accelerate/default_config.y
 COPY deepspeed_config.json /app/deepspeed_config.json
 
 # ========= Create mamba config =========
-RUN echo '{\n  "vocab_size": 96000,\n  "d_model": 2560,\n  "num_hidden_layers": 64,\n  "model_type": "mamba"\n}' > /app/configs/mamba_config.json
+RUN echo '{\n  "vocab_size": 96000,\n  "d_model": 2560,\n  "num_hidden_layers": 64,\n  "model_type": "mamba"\n}' > /app/mamba_config.json
 
 # ========= Training script =========
 COPY train_mamba.py /app/train_mamba.py
@@ -76,7 +76,7 @@ RUN python - <<'PY'
 import json
 from pathlib import Path
 from transformers import MambaLMHeadModel, MambaConfig
-cfg = json.load(open(Path('/app/configs/mamba_config.json')))
+cfg = json.load(open(Path('/app/mamba_config.json')))
 model = MambaLMHeadModel(MambaConfig(**cfg))
 print('✅ MambaLMHeadModel instantiated successfully')
 PY
