@@ -29,7 +29,7 @@ YunMin-mamba-training/
 ```
 
 Set the `MODEL_CONFIG_PATH` environment variable to point to either
-`configs/mamba_config.json` or `configs/mamba_7b.json` to choose which model size
+`configs/mamba_3b_config.json` or `configs/mamba_7b_config.json` to choose which model size
 to train.
 
 ## Model Architecture
