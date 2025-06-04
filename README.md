@@ -13,7 +13,8 @@ YunMin-mamba-3b/
 ├── train_mamba.py            # Main training script executed in SageMaker
 ├── accelerate_config.yaml    # HuggingFace Accelerate configuration
 ├── configs/
-│   └── mamba_config.json     # Model configuration (configs/mamba_config.json)
+│   ├── mamba_config.json     # 3B model configuration
+│   └── mamba_7b_config.json  # 7B model configuration
 ├── deepspeed_config.json     # Deepspeed configuration
 ├── sagemaker_training_job.py # Launch standard SageMaker training
 ├── sagemaker_spot_training_job.py # Launch Spot training job
@@ -22,7 +23,7 @@ YunMin-mamba-3b/
 
 ## Model Architecture
 
-The configuration file `configs/mamba_config.json` defines a 36‑layer Mamba-based model with 2,560 hidden units and a vocabulary of 96k tokens.  Gradient checkpointing and DeepSpeed ZeRO Stage 2 are enabled during training to keep GPU memory usage manageable.
+The configuration file `configs/mamba_config.json` defines the 3B model with 36 layers and a hidden size of 2,560.  A larger 7B variant is provided in `configs/mamba_7b_config.json` with 32 layers and a hidden size of 4,096.  Gradient checkpointing and DeepSpeed ZeRO Stage 2 are enabled during training to keep GPU memory usage manageable.  See [architecture.md](architecture.md) for the original training plan.
 
 ## Dataset Layout
 
