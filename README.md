@@ -51,6 +51,13 @@ settings used by the helper scripts.
 
 For additional configuration options and dataset layout, see [README_SAGEMAKER.md](README_SAGEMAKER.md).
 
+## Contributing
+
+If you want to run the test suite or make changes to this project, see
+[CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. The guide explains how to
+install optional dependencies like `transformers` and `mamba-ssm` before
+running `pytest`.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
