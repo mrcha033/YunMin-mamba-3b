@@ -54,6 +54,16 @@ s3://your-bucket/yunmin-mamba-data/dataset/tagged/
 
 For a full walkthrough in Korean, refer to [README_SAGEMAKER.md](README_SAGEMAKER.md).
 
+## Dataset Usage Notice
+
+Make sure you have the legal right to access and use any dataset before starting
+training. Review the license terms for each dataset and ensure your use complies
+with applicable laws and regulations. Consider privacy implications and assess
+your data for potential biases.
+
+The maintainers provide this project without warranty of any kind and do not
+guarantee that any dataset you choose is properly licensed for your purposes.
+
 ## Configuration
 
 Copy `example.env` to `.env` and update the values for your setup. The template
