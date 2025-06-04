@@ -6,6 +6,7 @@ tokenizers==0.15.2
 huggingface-hub==0.23.0
 datasets==2.17.1
 sentencepiece==0.2.0
+mamba-ssm==2.2.4
 accelerate==0.27.2
 causal-conv1d==1.5.0.post8
 tqdm==4.66.2
