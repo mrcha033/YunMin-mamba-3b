@@ -90,7 +90,7 @@ def create_training_job():
         instance_type='ml.p4d.24xlarge',  # High-performance GPU instance
         # instance_type='ml.g4dn.xlarge',  # Alternative for smaller training
         volume_size=200,                   # Increased EBS volume size
-        max_run=28*24*3600,                  # Max training time (28 days)
+        max_run=28*24*3600,                  # Max training time (28-day limit)
         hyperparameters=hyperparameters,
         environment={
             'SAGEMAKER_PROGRAM': 'train_mamba.py',
