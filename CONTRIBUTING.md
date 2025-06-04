@@ -17,10 +17,6 @@ system, set `MAMBA_SKIP_CUDA_BUILD=1` when installing these dependencies so the 
 MAMBA_SKIP_CUDA_BUILD=1 pip install -r requirements.txt
 ```
 
-```bash
-MAMBA_SKIP_CUDA_BUILD=1 pip install -r requirements.txt
-```
-
 After installing the dependencies, execute:
 
 ```bash
