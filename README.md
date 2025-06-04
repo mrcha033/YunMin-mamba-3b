@@ -56,7 +56,9 @@ For a full walkthrough in Korean, refer to [README_SAGEMAKER.md](README_SAGEMAKE
 
 ## Configuration
 
-Create a `.env` file and define the dataset paths, training hyperparameters and other settings used by the helper scripts.
+Copy `example.env` to `.env` and update the values for your setup. The template
+includes dataset paths, S3 output locations and common hyperparameters such as
+`LEARNING_RATE`, `BATCH_SIZE`, `MAX_SEQ_LENGTH` and the `MODEL_CONFIG_PATH`.
 
 ## Running a Training Job
 

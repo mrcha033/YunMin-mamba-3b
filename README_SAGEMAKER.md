@@ -32,6 +32,10 @@ YunMin-mamba-training/
     └── python-tests.yml
 ```
 
+프로젝트에 포함된 `example.env` 파일을 `.env` 로 복사한 뒤
+`TRAIN_DATA_S3`, `OUTPUT_PATH_S3`, `CHECKPOINT_S3`, `LEARNING_RATE` 등
+필요한 값을 수정하세요.
+
 `MODEL_CONFIG_PATH` 환경 변수를 `configs/mamba_3b_config.json` 또는
 `configs/mamba_7b_config.json`으로 설정하면 3B와 7B 중 원하는 모델을 선택할 수
 있습니다.
