@@ -60,10 +60,6 @@ COPY configs/mamba_config.json /app/configs/mamba_config.json
 # ========= Training script =========
 COPY train_mamba.py /app/train_mamba.py
 
-# ========= Create SageMaker train script =========
-RUN echo '#!/bin/bash\ncd /app\nexec python train_mamba.py "$@"' > /usr/local/bin/train && \
-    chmod +x /usr/local/bin/train
-
 # ========= Port and working directory =========
 EXPOSE 6006
 WORKDIR /app
