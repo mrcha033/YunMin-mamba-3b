@@ -8,24 +8,24 @@ YunMin‑Mamba 3B is an open 2.8B parameter language model based on the [Mamba a
 
 ```
 YunMin-mamba-training/
-├── Dockerfile                      # Base image for SageMaker training
-├── build_and_push_ecr.ps1          # Example script to push the image to ECR
+├── docker/
+│   └── Dockerfile                  # Base image for SageMaker training
 ├── requirements.txt                # Python dependencies
-├── train_mamba.py                  # Main training script executed in SageMaker
-├── accelerate_config.yaml          # HuggingFace Accelerate configuration
-├── deepspeed_config.json           # DeepSpeed configuration
-├── sagemaker_training_job.py       # Launch standard SageMaker training
-├── sagemaker_spot_training_job.py  # Launch Spot training job
-├── example.env                     # Environment variable template
-├── configs/
-│   ├── mamba_3b.json               # 3B model configuration
-│   └── mamba_7b.json               # 7B model configuration
+├── configs/                        # Model & training configs
+│   ├── accelerate_config.yaml      # HuggingFace Accelerate configuration
+│   ├── deepspeed_config.json       # DeepSpeed configuration
+│   ├── mamba_config.json           # 3B model configuration
+│   └── mamba_7b_config.json        # 7B model configuration
+├── src/
+│   └── train_mamba.py              # Main training script executed in SageMaker
+├── sagemaker/
+│   ├── sagemaker_training_job.py   # Launch standard SageMaker training
+│   └── sagemaker_spot_training_job.py  # Launch Spot training job
 ├── tests/
 │   └── test_imports.py             # Simple import test
 ├── .github/workflows/
 │   └── python-tests.yml            # CI workflow
-├── README_SAGEMAKER.md             # Detailed SageMaker instructions
-└── architecture.md
+└── README_SAGEMAKER.md             # Detailed SageMaker instructions
 ```
 
 Set the `MODEL_CONFIG_PATH` environment variable to point to either
@@ -69,12 +69,12 @@ Create a `.env` file and define the dataset paths, training hyperparameters and 
    docker push <ECR_URI>
    ```
 
-   Ensure that the resulting ECR URI is reflected in `sagemaker_spot_training_job.py` or `sagemaker_training_job.py`.
+   Ensure that the resulting ECR URI is reflected in `sagemaker/sagemaker_spot_training_job.py` or `sagemaker/sagemaker_training_job.py`.
 
 2. **Start the job on SageMaker**:
 
    ```bash
-   python sagemaker_spot_training_job.py
+   python sagemaker/sagemaker_spot_training_job.py
    ```
 
    The script creates a training job using Spot instances and resumes from the latest checkpoint when interrupted.

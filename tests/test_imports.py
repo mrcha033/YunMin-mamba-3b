@@ -4,7 +4,10 @@ from pathlib import Path
 # Ensure the training script and generated modules are syntactically valid
 
 def test_compile_train_mamba():
-    py_compile.compile(str(Path(__file__).resolve().parents[1] / "train_mamba.py"), doraise=True)
+    py_compile.compile(
+        str(Path(__file__).resolve().parents[1] / "src" / "train_mamba.py"),
+        doraise=True,
+    )
 
 
 def test_mamba_lmheadmodel_instantiation():
@@ -30,7 +33,7 @@ def test_mamba_lmheadmodel_instantiation():
 def test_compile_sagemaker_launcher():
     """Ensure the SageMaker launcher script is syntactically valid"""
     py_compile.compile(
-        str(Path(__file__).resolve().parents[1] / "sagemaker_training_job.py"),
+        str(Path(__file__).resolve().parents[1] / "sagemaker" / "sagemaker_training_job.py"),
         doraise=True,
     )
 
@@ -52,7 +55,7 @@ def test_parse_dockerfile():
         from dockerfile_parse import DockerfileParser
     except ImportError as exc:  # pragma: no cover - skip if unavailable
         pytest.skip(f"dockerfile_parse unavailable: {exc}")
-    dockerfile_path = Path(__file__).resolve().parents[1] / "Dockerfile"
+    dockerfile_path = Path(__file__).resolve().parents[1] / "docker" / "Dockerfile"
     parser = DockerfileParser(str(dockerfile_path))
     assert parser.baseimage is not None
 

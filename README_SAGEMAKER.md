@@ -13,17 +13,19 @@
 
 ```
 YunMin-mamba-training/
-├── Dockerfile
-├── build_and_push_ecr.ps1
-├── train_mamba.py
-├── accelerate_config.yaml
-├── deepspeed_config.json
-├── sagemaker_training_job.py
-├── sagemaker_spot_training_job.py
-├── example.env
+├── docker/
+│   └── Dockerfile
+├── src/
+│   └── train_mamba.py
 ├── configs/
-│   ├── mamba_3b.json
-│   └── mamba_7b.json
+│   ├── accelerate_config.yaml
+│   ├── deepspeed_config.json
+│   ├── mamba_config.json
+│   └── mamba_7b_config.json
+├── sagemaker/
+│   ├── sagemaker_training_job.py
+│   └── sagemaker_spot_training_job.py
+├── example.env
 ├── tests/
 │   └── test_imports.py
 └── .github/workflows/
@@ -70,7 +72,7 @@ s3://your-bucket/yunmin-mamba-data/dataset/tagged/
 
 ```python
 # sagemaker_training_job.py 수정 후 실행
-python sagemaker_training_job.py
+python sagemaker/sagemaker_training_job.py
 ```
 
 ## ⚙️ Configuration
