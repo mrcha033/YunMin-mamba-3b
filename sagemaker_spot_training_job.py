@@ -90,8 +90,8 @@ def create_spot_training_job():
         instance_count=1,
         instance_type='ml.p4d.24xlarge',  # High-performance GPU instance
         volume_size=200,
-        max_run=432000,   # Max training time (7 days)
-        max_wait=432000, # Max wait time including spot delays (14 days)
+        max_run=432000,   # Max training time (5 days)
+        max_wait=432000, # Max wait time including spot delays (5 days)
         
         # Spot instance configuration
         use_spot_instances=True,
