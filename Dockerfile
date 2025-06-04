@@ -39,8 +39,8 @@ RUN pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url h
 # 3) Install base deps
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 4) Create simple mamba implementation directly
-RUN echo 'import torch\nimport torch.nn as nn\nimport math\n\nclass Mamba(nn.Module):\n    def __init__(self, d_model=512, d_state=16, d_conv=4, expand=2):\n        super().__init__()\n        self.d_model = d_model\n        self.d_inner = int(expand * d_model)\n        self.d_state = d_state\n        self.d_conv = d_conv\n        \n        self.in_proj = nn.Linear(d_model, self.d_inner * 2, bias=False)\n        self.conv1d = nn.Conv1d(\n            in_channels=self.d_inner,\n            out_channels=self.d_inner,\n            bias=True,\n            kernel_size=d_conv,\n            groups=self.d_inner,\n            padding=d_conv - 1,\n        )\n        self.x_proj = nn.Linear(self.d_inner, d_state * 2, bias=False)\n        self.dt_proj = nn.Linear(self.d_inner, d_state, bias=True)\n        self.A_log = nn.Parameter(torch.log(torch.arange(1, d_state + 1, dtype=torch.float32)))\n        self.D = nn.Parameter(torch.ones(self.d_inner))\n        self.out_proj = nn.Linear(self.d_inner, d_model, bias=False)\n        \n    def forward(self, x):\n        B, L, D = x.shape\n        \n        # Linear projection\n        x_and_res = self.in_proj(x)\n        x, res = x_and_res.split(split_size=[self.d_inner, self.d_inner], dim=-1)\n        \n        # Convolution\n        x = x.transpose(1, 2)\n        x = self.conv1d(x)[:, :, :L]\n        x = x.transpose(1, 2)\n        \n        # Activation\n        x = nn.functional.silu(x)\n        \n        # SSM computation (simplified)\n        # This is a simplified version for compatibility\n        y = x\n        \n        # Gate\n        y = y * nn.functional.silu(res)\n        \n        # Output projection\n        output = self.out_proj(y)\n        \n        return output\n' > /app/mamba_simple.py
+# 4) Copy simple mamba implementation
+COPY mamba_simple.py /app/
 
 # 5) Create necessary directories
 RUN mkdir -p /app/logs /app/checkpoints /app/configs
