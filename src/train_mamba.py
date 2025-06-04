@@ -401,6 +401,11 @@ def main():
         default=None,
         help="Path to the model configuration JSON file",
     )
+    parser.add_argument(
+        "--dataset-path",
+        default=None,
+        help="Optional local path to the dataset directory",
+    )
     args, _ = parser.parse_known_args()
     # Set PyTorch memory optimization
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
@@ -432,7 +437,8 @@ def main():
         or hyperparams.get("model_config_path")
         or os.environ.get("MODEL_CONFIG_PATH", "configs/mamba_config.json")
     )
-    dataset_path = input_path
+    dataset_path = args.dataset_path or input_path
+    logger.info(f"Dataset path resolved to: {dataset_path}")
 
     # Separate directories for checkpoints and final model
     checkpoint_root = os.environ.get('SM_CHECKPOINT_DIR', '/opt/ml/checkpoints')

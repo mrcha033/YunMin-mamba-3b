@@ -145,6 +145,8 @@ SageMaker 훈련 작업에서 다음 하이퍼파라미터를 설정할 수 있�
 - `SM_OUTPUT_DATA_DIR`: 출력 데이터 경로
 - `/opt/ml/input/config/hyperparameters.json`: 하이퍼파라미터
 
+`src/train_mamba.py` 를 직접 실행할 때는 `--dataset-path` 옵션으로 `SM_CHANNEL_TRAINING` 값을 덮어쓸 수 있습니다.
+
 ## 📁 Output Structure
 
 훈련 완료 후 다음과 같은 구조로 결과가 저장됩니다:
