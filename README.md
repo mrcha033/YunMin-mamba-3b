@@ -1,6 +1,8 @@
 # YunMin-Mamba 3B Pretraining Environment
 
-This repository provides the Docker image and helper scripts used to train the **YunMin-Mamba 3B** language model on Amazon SageMaker.
+This repository contains the Docker environment and helper scripts used to train the **YunMin-Mamba 3B** language model on Amazon SageMaker.
+
+YunMin‑Mamba 3B is an open 2.8B parameter language model based on the [Mamba architecture](https://github.com/state-spaces/mamba).  Training is orchestrated with HuggingFace Accelerate and DeepSpeed, and the dataset is organised into multiple categories that are processed in a curriculum order.  Most of the step‑by‑step instructions are written in Korean inside [README_SAGEMAKER.md](README_SAGEMAKER.md).
 
 ## Project Structure
 
@@ -19,6 +21,28 @@ YunMin-mamba-3b/
 ├── README_SAGEMAKER.md       # Detailed SageMaker instructions
 └── architecture.md
 ```
+
+## Model Architecture
+
+The configuration file `configs/mamba_config.json` defines a 36‑layer Mamba-based model with 2,560 hidden units and a vocabulary of 96k tokens.  Gradient checkpointing and DeepSpeed ZeRO Stage 2 are enabled during training to keep GPU memory usage manageable.  See [architecture.md](architecture.md) for the original training plan.
+
+## Dataset Layout
+
+Training data is expected under an S3 bucket following the structure below.  Each category is processed in the listed order so the model gradually learns from formal text to conversational language.
+
+```
+s3://your-bucket/yunmin-mamba-data/dataset/tagged/
+├── main_data/
+├── korean_textbook/
+├── academic_data/
+├── papers_data/
+├── national_data/
+├── national_assembly_data/
+├── web_data/
+└── social_media_data/
+```
+
+For a full walkthrough in Korean, refer to [README_SAGEMAKER.md](README_SAGEMAKER.md).
 
 ## Configuration
 
@@ -83,6 +107,13 @@ Then run the test suite with `pytest`:
 ```bash
 pytest
 ```
+
+## Documentation
+
+Additional usage notes and a detailed walkthrough of the SageMaker workflow are available in:
+
+- [README_SAGEMAKER.md](README_SAGEMAKER.md) – Korean quick start and troubleshooting guide
+- [architecture.md](architecture.md) – original training plan and environment setup
 
 ## License
 
