@@ -9,7 +9,6 @@ YunMin‑Mamba 3B is an open 2.8B parameter language model based on the [Mamba a
 ```
 YunMin-mamba-3b/
 ├── Dockerfile                # Base image for SageMaker training
-├── build_and_push_ecr.ps1    # Example script to push the image to ECR
 ├── requirements.txt          # Python dependencies
 ├── train_mamba.py            # Main training script executed in SageMaker
 ├── accelerate_config.yaml    # HuggingFace Accelerate configuration
@@ -19,8 +18,7 @@ YunMin-mamba-3b/
 ├── deepspeed_config.json     # Deepspeed configuration
 ├── sagemaker_training_job.py # Launch standard SageMaker training
 ├── sagemaker_spot_training_job.py # Launch Spot training job
-├── README_SAGEMAKER.md       # Detailed SageMaker instructions
-└── architecture.md
+└── README_SAGEMAKER.md       # Detailed SageMaker instructions
 ```
 
 ## Model Architecture
@@ -47,22 +45,17 @@ For a full walkthrough in Korean, refer to [README_SAGEMAKER.md](README_SAGEMAKE
 
 ## Configuration
 
-Copy `example.env` to `.env` and adjust the values for your environment:
-
-```bash
-cp example.env .env
-```
-
-This file defines the dataset paths, training hyperparameters and other
-settings used by the helper scripts.
+Create a `.env` file and define the dataset paths, training hyperparameters and other settings used by the helper scripts.
 
 ## Running a Training Job
 
-1. **Push the Docker image to ECR** (example for Windows PowerShell):
+1. **Push the Docker image to ECR**:
 
-   ```powershell
+   ```bash
    aws sts get-caller-identity
-   ./build_and_push_ecr.ps1
+   docker build -t <your-image> .
+   docker tag <your-image> <ECR_URI>
+   docker push <ECR_URI>
    ```
 
    Ensure that the resulting ECR URI is reflected in `sagemaker_spot_training_job.py` or `sagemaker_training_job.py`.
@@ -114,7 +107,6 @@ pytest
 Additional usage notes and a detailed walkthrough of the SageMaker workflow are available in:
 
 - [README_SAGEMAKER.md](README_SAGEMAKER.md) – Korean quick start and troubleshooting guide
-- [architecture.md](architecture.md) – original training plan and environment setup
 
 ## License
 
