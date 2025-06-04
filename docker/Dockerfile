@@ -36,7 +36,7 @@ WORKDIR /app
 RUN pip install --upgrade pip setuptools wheel ninja packaging numpy
 
 # 2) Install PyTorch for CUDA 12.1
-RUN pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu121
+RUN pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu121
 
 # 3) Install base deps
 RUN pip install --no-cache-dir -r requirements.txt
