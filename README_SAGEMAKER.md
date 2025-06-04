@@ -78,7 +78,7 @@ SageMaker 훈련 작업에서 다음 하이퍼파라미터를 설정할 수 있�
 
 ### Model Configuration
 
-`configs/mamba_config.json`:
+`mamba_config.json`:
 ```json
 {
   "vocab_size": 96000,
@@ -155,10 +155,10 @@ docker run --rm --gpus all \
 docker run -it --rm yunmin-mamba:latest bash
 
 # 모델 초기화 테스트
-docker run --rm yunmin-mamba:latest python -c "\
-from transformers import MambaLMHeadModel, MambaConfig;\
-MambaLMHeadModel(MambaConfig.from_pretrained('configs/mamba_config.json'));\
-print('✅ MambaLMHeadModel imported')\
+docker run --rm yunmin-mamba:latest python -c "
+from transformers import AutoConfig, AutoModelForCausalLM
+AutoModelForCausalLM.from_config(AutoConfig.from_pretrained('mamba_config.json'))
+print('✅ Model can be imported')
 "
 ```
 
