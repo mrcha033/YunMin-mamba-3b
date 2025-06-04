@@ -218,7 +218,7 @@ def load_dataset_category(dataset_path, category):
 
 def train_on_category(accelerator, model, tokenizer, category_dataset, category,
                      optimizer_params, lr_scheduler, data_collator, checkpoint_root, step_offset,
-                     batch_size, num_workers, save_steps):
+                     batch_size, num_workers, save_steps, resume_from_checkpoint=None, load_checkpoint=False):
     """Train on a specific dataset category with DeepSpeed ZeRO optimization"""
     logger.info(f"🚀 Starting training on {category}...")
     
@@ -236,6 +236,17 @@ def train_on_category(accelerator, model, tokenizer, category_dataset, category,
     
     # Prepare with accelerator
     train_dataloader = accelerator.prepare(train_dataloader)
+
+    if load_checkpoint and resume_from_checkpoint:
+        logger.info(f"🔄 Loading checkpoint from {resume_from_checkpoint}")
+        try:
+            accelerator.load_state(resume_from_checkpoint)
+            logger.info(f"✅ Successfully resumed from step {step_offset}")
+        except Exception as e:
+            logger.error(f"❌ Failed to load checkpoint: {e}")
+            logger.info("🆕 Starting fresh training instead")
+            step_offset = 0
+            resume_from_checkpoint = None
     
     model.train()
     global_step = step_offset
@@ -540,15 +551,7 @@ def main():
     logger.info(f"🔧 Using DeepSpeed ZeRO Stage 2 with optimizer offloading for memory efficiency")
     
     if resume_from_checkpoint and os.path.exists(resume_from_checkpoint):
-        logger.info(f"🔄 Loading checkpoint from {resume_from_checkpoint}")
-        try:
-            accelerator.load_state(resume_from_checkpoint)
-            logger.info(f"✅ Successfully resumed from step {start_step}")
-        except Exception as e:
-            logger.error(f"❌ Failed to load checkpoint: {e}")
-            logger.info("🆕 Starting fresh training instead")
-            start_step = 0
-            resume_from_checkpoint = None
+        logger.info(f"🔄 Found checkpoint at {resume_from_checkpoint}. Will load after initialization")
     elif resume_from_checkpoint:
         logger.warning(f"⚠️ Checkpoint path {resume_from_checkpoint} not found. Starting fresh training.")
         start_step = 0
@@ -602,6 +605,7 @@ def main():
     # Train on each category in order
     global_step = start_step  # Start from checkpoint step
     
+    loaded_checkpoint = False
     for category in LEARNING_ORDER:
         logger.info(f"📚 Processing dataset category: {category}")
         
@@ -631,8 +635,11 @@ def main():
         global_step = train_on_category(
             accelerator, model, tokenizer, category_dataset, category,
             None, lr_scheduler, data_collator, checkpoint_root, global_step,
-            batch_size, num_workers, save_steps
+            batch_size, num_workers, save_steps,
+            resume_from_checkpoint if not loaded_checkpoint else None,
+            load_checkpoint=not loaded_checkpoint and resume_from_checkpoint is not None
         )
+        loaded_checkpoint = True
         
         logger.info(f"🎯 Completed {category}. Total steps so far: {global_step}")
 
@@ -649,4 +656,4 @@ def main():
         logger.info(f"📋 Logs copied to {output_path}/logs")
 
 if __name__ == "__main__":
-    main() 
+    main()
