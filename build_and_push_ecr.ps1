@@ -78,4 +78,4 @@ try {
 }
 
 Write-Host "🎉 Docker image is ready! You can now run the SageMaker training job." -ForegroundColor Green
-Write-Host "💡 Next step: python sagemaker_training_job.py" -ForegroundColor Yellow
+Write-Host "💡 Next step: python sagemaker\sagemaker_training_job.py" -ForegroundColor Yellow
