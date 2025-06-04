@@ -1,10 +1,11 @@
 # Contributing
 
-Thank you for your interest in contributing! Before running the test suite, make sure the required packages are installed.
+Thank you for your interest in contributing to this project!
 
-## Installing Dependencies for Tests
+## Running Tests
 
-The unit tests rely on Hugging Face's `transformers` library and the `mamba-ssm` package. Install them with pip:
+The unit tests require a few optional libraries that are not installed by default.
+Before executing `pytest`, install `transformers` and `mamba-ssm`:
 
 ```bash
 pip install transformers mamba-ssm
