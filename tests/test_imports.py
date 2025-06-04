@@ -14,3 +14,11 @@ def test_mamba_lmheadmodel_instantiation():
     cfg = json.loads(cfg_path.read_text())
     model = MambaLMHeadModel(MambaConfig(**cfg))
     assert model is not None
+
+def test_compile_sagemaker_launcher():
+    """Ensure the SageMaker launcher script is syntactically valid"""
+    py_compile.compile(
+        str(Path(__file__).resolve().parents[1] / "sagemaker_training_job.py"),
+        doraise=True,
+    )
+

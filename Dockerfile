@@ -49,7 +49,6 @@ RUN python - <<'PY'
 from transformers import MambaLMHeadModel
 print('✅ MambaLMHeadModel imported successfully')
 PY
-
 # ========= Accelerate configuration =========
 RUN mkdir -p "/root/.cache/huggingface/accelerate"
 COPY accelerate_config.yaml /root/.cache/huggingface/accelerate/default_config.yaml
