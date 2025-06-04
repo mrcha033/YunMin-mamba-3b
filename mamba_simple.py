@@ -10,7 +10,6 @@ class Mamba(nn.Module):
         self.d_inner = int(expand * d_model)
         self.d_state = d_state
         self.d_conv = d_conv
-
         self.in_proj = nn.Linear(d_model, self.d_inner * 2, bias=False)
         self.conv1d = nn.Conv1d(
             in_channels=self.d_inner,
