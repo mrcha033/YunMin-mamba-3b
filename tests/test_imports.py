@@ -7,5 +7,10 @@ def test_compile_train_mamba():
     py_compile.compile(str(Path(__file__).resolve().parents[1] / "train_mamba.py"), doraise=True)
 
 
-def test_compile_mamba_simple():
-    py_compile.compile(str(Path(__file__).resolve().parents[1] / "mamba_simple.py"), doraise=True)
+def test_compile_sagemaker_launcher():
+    """Ensure the SageMaker launcher script is syntactically valid"""
+    py_compile.compile(
+        str(Path(__file__).resolve().parents[1] / "sagemaker_training_job.py"),
+        doraise=True,
+    )
+
