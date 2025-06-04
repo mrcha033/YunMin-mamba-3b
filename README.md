@@ -29,12 +29,12 @@ YunMin-mamba-training/
 ```
 
 Set the `MODEL_CONFIG_PATH` environment variable to point to either
-`configs/mamba_3b.json` or `configs/mamba_7b.json` to choose which model size
+`configs/mamba_3b_config.json` or `configs/mamba_7b_config.json` to choose which model size
 to train.
 
 ## Model Architecture
 
-The configuration file `configs/mamba_config.json` defines the 3B model with 36 layers and a hidden size of 2,560.  A larger 7B variant is provided in `configs/mamba_7b_config.json` with 32 layers and a hidden size of 4,096.  Gradient checkpointing and DeepSpeed ZeRO Stage 2 are enabled during training to keep GPU memory usage manageable. 
+The configuration file `configs/mamba_3b_config.json` defines the 3B model with 36 layers and a hidden size of 2,560.  A larger 7B variant is provided in `configs/mamba_7b_config.json` with 32 layers and a hidden size of 4,096.  Gradient checkpointing and DeepSpeed ZeRO Stage 2 are enabled during training to keep GPU memory usage manageable. 
 
 ## Dataset Layout
 
@@ -56,7 +56,9 @@ For a full walkthrough in Korean, refer to [README_SAGEMAKER.md](README_SAGEMAKE
 
 ## Configuration
 
-Create a `.env` file and define the dataset paths, training hyperparameters and other settings used by the helper scripts.
+Copy `example.env` to `.env` and update the values for your setup. The template
+includes dataset paths, S3 output locations and common hyperparameters such as
+`LEARNING_RATE`, `BATCH_SIZE`, `MAX_SEQ_LENGTH` and the `MODEL_CONFIG_PATH`.
 
 ## Running a Training Job
 
