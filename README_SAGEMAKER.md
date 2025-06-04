@@ -33,7 +33,7 @@
 # AWS CLI 설정 확인
 aws sts get-caller-identity
 
-docker build -t <your-image> .
+docker build -f docker/Dockerfile -t <your-image> .
 docker tag <your-image> <ECR_URI>
 docker push <ECR_URI>
 ```

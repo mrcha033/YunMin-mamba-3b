@@ -66,7 +66,7 @@ Create a `.env` file and define the dataset paths, training hyperparameters and 
 
    ```bash
    aws sts get-caller-identity
-   docker build -t <your-image> .
+   docker build -f docker/Dockerfile -t <your-image> .
    docker tag <your-image> <ECR_URI>
    docker push <ECR_URI>
    ```

@@ -38,6 +38,14 @@ def test_compile_sagemaker_launcher():
     )
 
 
+def test_compile_sagemaker_spot_launcher():
+    """Ensure the SageMaker Spot launcher script is syntactically valid"""
+    py_compile.compile(
+        str(Path(__file__).resolve().parents[1] / "sagemaker" / "sagemaker_spot_training_job.py"),
+        doraise=True,
+    )
+
+
 def test_parse_dockerfile():
     """Basic syntax check for the Dockerfile using dockerfile-parse"""
     import pytest
