@@ -95,6 +95,7 @@ def create_training_job():
         environment={
             'SAGEMAKER_PROGRAM': 'train_mamba.py',
             'SAGEMAKER_SUBMIT_DIRECTORY': '/app',
+            'MODEL_CONFIG_PATH': 'configs/mamba_config.json',
         },
         output_path=output_path,
         sagemaker_session=sagemaker_session,
