@@ -9,6 +9,7 @@ import os
 import json
 from pathlib import Path
 from tqdm import tqdm
+import argparse
 from datasets import load_from_disk, concatenate_datasets
 from transformers import AutoTokenizer, AutoConfig, AutoModelForCausalLM
 from torch.utils.data import DataLoader
@@ -394,6 +395,13 @@ def preprocess_dataset(dataset, tokenizer, max_length=1024, category="unknown"):
 
 # Main function
 def main():
+    parser = argparse.ArgumentParser(description="YunMin-Mamba training")
+    parser.add_argument(
+        "--model-config-path",
+        default=None,
+        help="Path to the model configuration JSON file",
+    )
+    args, _ = parser.parse_known_args()
     # Set PyTorch memory optimization
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
     
@@ -419,7 +427,11 @@ def main():
             hyperparams = json.load(f)
     
     # Paths and configs
-    model_config_path = "configs/mamba_config.json"
+    model_config_path = (
+        args.model_config_path
+        or hyperparams.get("model_config_path")
+        or os.environ.get("MODEL_CONFIG_PATH", "configs/mamba_config.json")
+    )
     dataset_path = input_path
 
     # Separate directories for checkpoints and final model

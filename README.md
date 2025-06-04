@@ -34,7 +34,7 @@ to train.
 
 ## Model Architecture
 
-The configuration file `configs/mamba_config.json` defines a 36‑layer Mamba-based model with 2,560 hidden units and a vocabulary of 96k tokens.  Gradient checkpointing and DeepSpeed ZeRO Stage 2 are enabled during training to keep GPU memory usage manageable.  See [architecture.md](architecture.md) for the original training plan.
+The configuration file `configs/mamba_config.json` defines the 3B model with 36 layers and a hidden size of 2,560.  A larger 7B variant is provided in `configs/mamba_7b_config.json` with 32 layers and a hidden size of 4,096.  Gradient checkpointing and DeepSpeed ZeRO Stage 2 are enabled during training to keep GPU memory usage manageable.  See [architecture.md](architecture.md) for the original training plan.
 
 ## Dataset Layout
 
@@ -56,22 +56,17 @@ For a full walkthrough in Korean, refer to [README_SAGEMAKER.md](README_SAGEMAKE
 
 ## Configuration
 
-Copy `example.env` to `.env` and adjust the values for your environment:
-
-```bash
-cp example.env .env
-```
-
-This file defines the dataset paths, training hyperparameters and other
-settings used by the helper scripts.
+Create a `.env` file and define the dataset paths, training hyperparameters and other settings used by the helper scripts.
 
 ## Running a Training Job
 
-1. **Push the Docker image to ECR** (example for Windows PowerShell):
+1. **Push the Docker image to ECR**:
 
-   ```powershell
+   ```bash
    aws sts get-caller-identity
-   ./build_and_push_ecr.ps1
+   docker build -t <your-image> .
+   docker tag <your-image> <ECR_URI>
+   docker push <ECR_URI>
    ```
 
    Ensure that the resulting ECR URI is reflected in `sagemaker_spot_training_job.py` or `sagemaker_training_job.py`.
@@ -123,7 +118,6 @@ pytest
 Additional usage notes and a detailed walkthrough of the SageMaker workflow are available in:
 
 - [README_SAGEMAKER.md](README_SAGEMAKER.md) – Korean quick start and troubleshooting guide
-- [architecture.md](architecture.md) – original training plan and environment setup
 
 ## License
 
