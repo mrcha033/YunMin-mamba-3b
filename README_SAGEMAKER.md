@@ -11,13 +11,13 @@
 
 ## 📦 Files Overview
 
-- `Dockerfile`: SageMaker 호환 Docker 이미지
-- `train_mamba.py`: 메인 훈련 스크립트
-- `build_and_push_ecr.ps1`: ECR 푸시 스크립트 (Windows PowerShell 예시)
-- `sagemaker_spot_training_job.py`: Spot 인스턴스용 훈련 작업 스크립트
-- `sagemaker_training_job.py`: SageMaker 훈련 작업 실행 스크립트
-- `requirements.txt`: Python 의존성
-- `accelerate_config.yaml`: Hugging Face Accelerate 설정
+ - `docker/Dockerfile`: SageMaker 호환 Docker 이미지
+ - `src/train_mamba.py`: 메인 훈련 스크립트
+ - `build_and_push_ecr.ps1`: ECR 푸시 스크립트 (Windows PowerShell 예시)
+ - `sagemaker/sagemaker_spot_training_job.py`: Spot 인스턴스용 훈련 작업 스크립트
+ - `sagemaker/sagemaker_training_job.py`: SageMaker 훈련 작업 실행 스크립트
+ - `requirements.txt`: Python 의존성
+ - `configs/accelerate_config.yaml`: Hugging Face Accelerate 설정
 
 ## 🚀 Quick Start
 
@@ -54,7 +54,7 @@ s3://your-bucket/yunmin-mamba-data/dataset/tagged/
 
 ```python
 # sagemaker_training_job.py 수정 후 실행
-python sagemaker_training_job.py
+python sagemaker/sagemaker_training_job.py
 ```
 
 ## ⚙️ Configuration

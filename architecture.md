@@ -35,7 +35,8 @@ pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 \
 ```
 /home/ec2-user/
 |│
-├── train_mamba.py                 # main trainer script
+├── src/
+│   └── train_mamba.py             # main trainer script
 ├── configs/
 │   └── mamba_config.json            # Mamba 3B 구성 정의
 ├── tokenizer/

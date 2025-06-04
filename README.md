@@ -8,16 +8,19 @@ YunMin‑Mamba 3B is an open 2.8B parameter language model based on the [Mamba a
 
 ```
 YunMin-mamba-3b/
-├── Dockerfile                # Base image for SageMaker training
+├── docker/
+│   └── Dockerfile            # Base image for SageMaker training
 ├── build_and_push_ecr.ps1    # Example script to push the image to ECR
 ├── requirements.txt          # Python dependencies
-├── train_mamba.py            # Main training script executed in SageMaker
-├── accelerate_config.yaml    # HuggingFace Accelerate configuration
+├── src/
+│   └── train_mamba.py        # Main training script executed in SageMaker
 ├── configs/
-│   └── mamba_config.json     # Model configuration (configs/mamba_config.json)
-├── deepspeed_config.json     # Deepspeed configuration
-├── sagemaker_training_job.py # Launch standard SageMaker training
-├── sagemaker_spot_training_job.py # Launch Spot training job
+│   ├── accelerate_config.yaml  # HuggingFace Accelerate configuration
+│   ├── deepspeed_config.json   # Deepspeed configuration
+│   └── mamba_config.json       # Model configuration
+├── sagemaker/
+│   ├── sagemaker_training_job.py       # Launch standard SageMaker training
+│   └── sagemaker_spot_training_job.py  # Launch Spot training job
 ├── README_SAGEMAKER.md       # Detailed SageMaker instructions
 └── architecture.md
 ```
@@ -64,12 +67,12 @@ settings used by the helper scripts.
    ./build_and_push_ecr.ps1
    ```
 
-   Ensure that the resulting ECR URI is reflected in `sagemaker_spot_training_job.py` or `sagemaker_training_job.py`.
+   Ensure that the resulting ECR URI is reflected in `sagemaker/sagemaker_spot_training_job.py` or `sagemaker/sagemaker_training_job.py`.
 
 2. **Start the job on SageMaker**:
 
    ```bash
-   python sagemaker_spot_training_job.py
+   python sagemaker/sagemaker_spot_training_job.py
    ```
 
    The script creates a training job using Spot instances and resumes from the latest checkpoint when interrupted.

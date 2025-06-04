@@ -49,7 +49,7 @@ try {
 # Step 4: Build Docker image
 Write-Host "🏗️ Building Docker image..." -ForegroundColor Yellow
 try {
-    docker build -t "$REPOSITORY_NAME`:$IMAGE_TAG" .
+    docker build -f docker/Dockerfile -t "$REPOSITORY_NAME`:$IMAGE_TAG" .
     Write-Host "✅ Docker image built successfully" -ForegroundColor Green
 } catch {
     Write-Host "❌ Failed to build Docker image" -ForegroundColor Red
@@ -78,4 +78,4 @@ try {
 }
 
 Write-Host "🎉 Docker image is ready! You can now run the SageMaker training job." -ForegroundColor Green
-Write-Host "💡 Next step: python sagemaker_training_job.py" -ForegroundColor Yellow
+Write-Host "💡 Next step: python sagemaker\sagemaker_training_job.py" -ForegroundColor Yellow

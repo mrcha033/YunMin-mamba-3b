@@ -51,14 +51,14 @@ print('✅ MambaLMHeadModel imported successfully')
 PY
 # ========= Accelerate configuration =========
 RUN mkdir -p "/root/.cache/huggingface/accelerate"
-COPY accelerate_config.yaml /root/.cache/huggingface/accelerate/default_config.yaml
-COPY deepspeed_config.json /app/deepspeed_config.json
+COPY configs/accelerate_config.yaml /root/.cache/huggingface/accelerate/default_config.yaml
+COPY configs/deepspeed_config.json /app/configs/deepspeed_config.json
 
 # ========= Create mamba config =========
 COPY configs/mamba_config.json /app/configs/mamba_config.json
 
 # ========= Training script =========
-COPY train_mamba.py /app/train_mamba.py
+COPY src/train_mamba.py /app/src/train_mamba.py
 
 # ========= Port and working directory =========
 EXPOSE 6006
@@ -78,8 +78,8 @@ print('✅ MambaLMHeadModel instantiated successfully')
 PY
 
 # ========= SageMaker entrypoint =========
-ENV SAGEMAKER_PROGRAM=train_mamba.py
+ENV SAGEMAKER_PROGRAM=src/train_mamba.py
 ENV SAGEMAKER_SUBMIT_DIRECTORY=/app
 
 # ========= Default entrypoint =========
-CMD ["python", "train_mamba.py"]
+CMD ["python", "src/train_mamba.py"]
