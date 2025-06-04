@@ -19,6 +19,17 @@ YunMin-mamba-3b/
 └── architecture.md
 ```
 
+## Configuration
+
+Copy `example.env` to `.env` and adjust the values for your environment:
+
+```bash
+cp example.env .env
+```
+
+This file defines the dataset paths, training hyperparameters and other
+settings used by the helper scripts.
+
 ## Running a Training Job
 
 1. **Push the Docker image to ECR** (example for Windows PowerShell):
@@ -39,3 +50,7 @@ YunMin-mamba-3b/
    The script creates a training job using Spot instances and resumes from the latest checkpoint when interrupted.
 
 For additional configuration options and dataset layout, see [README_SAGEMAKER.md](README_SAGEMAKER.md).
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
