@@ -59,6 +59,15 @@ If you want to run the test suite or make changes to this project, see
 install optional dependencies like `transformers` and `mamba-ssm` before
 running `pytest`.
 
+## Installation
+
+Install the Python packages from `requirements.txt`. If `nvcc` is not available
+on your system, set `MAMBA_SKIP_CUDA_BUILD=1` so the GPU kernels are skipped:
+
+```bash
+MAMBA_SKIP_CUDA_BUILD=1 pip install -r requirements.txt
+```
+
 ## Running Tests
 
 Install the minimal dependencies required for the unit tests:
