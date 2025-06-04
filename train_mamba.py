@@ -421,8 +421,7 @@ def main():
             hyperparams = json.load(f)
     
     # Paths and configs
-    # Load the model configuration from the repository root
-    model_config_path = Path(__file__).resolve().parent / "mamba_config.json"
+    model_config_path = "mamba_config.json"
     dataset_path = input_path
 
     # Separate directories for checkpoints and final model
