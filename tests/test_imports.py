@@ -17,8 +17,13 @@ def test_mamba_lmheadmodel_instantiation():
     except Exception as exc:  # pragma: no cover - skip if unavailable
         pytest.skip(f"MambaLMHeadModel unavailable: {exc}")
 
-    cfg_path = Path(__file__).resolve().parents[1] / "mamba_config.json"
-    cfg = json.loads(cfg_path.read_text())
+    # Use a very small configuration to avoid excessive memory usage during CI
+    cfg = {
+        "hidden_size": 64,
+        "intermediate_size": 256,
+        "num_hidden_layers": 2,
+        "vocab_size": 1000,
+    }
     model = MambaLMHeadModel(MambaConfig(**cfg))
     assert model is not None
 
