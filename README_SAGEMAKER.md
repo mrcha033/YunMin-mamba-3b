@@ -9,15 +9,30 @@
 - **Training**: Multi-category curriculum learning
 - **Platform**: Amazon SageMaker Training Jobs
 
-## 📦 Files Overview
+## 📂 Project Structure
 
-- `Dockerfile`: SageMaker 호환 Docker 이미지
-- `train_mamba.py`: 메인 훈련 스크립트
-- `build_and_push_ecr.ps1`: ECR 푸시 스크립트 (Windows PowerShell 예시)
-- `sagemaker_spot_training_job.py`: Spot 인스턴스용 훈련 작업 스크립트
-- `sagemaker_training_job.py`: SageMaker 훈련 작업 실행 스크립트
-- `requirements.txt`: Python 의존성
-- `accelerate_config.yaml`: Hugging Face Accelerate 설정
+```
+YunMin-mamba-training/
+├── Dockerfile
+├── build_and_push_ecr.ps1
+├── train_mamba.py
+├── accelerate_config.yaml
+├── deepspeed_config.json
+├── sagemaker_training_job.py
+├── sagemaker_spot_training_job.py
+├── example.env
+├── configs/
+│   ├── mamba_3b.json
+│   └── mamba_7b.json
+├── tests/
+│   └── test_imports.py
+└── .github/workflows/
+    └── python-tests.yml
+```
+
+`MODEL_CONFIG_PATH` 환경 변수를 `configs/mamba_3b.json` 또는
+`configs/mamba_7b.json`으로 설정하면 3B와 7B 중 원하는 모델을 선택할 수
+있습니다.
 
 ## 🚀 Quick Start
 

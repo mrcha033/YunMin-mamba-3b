@@ -7,20 +7,30 @@ YunMin‑Mamba 3B is an open 2.8B parameter language model based on the [Mamba a
 ## Project Structure
 
 ```
-YunMin-mamba-3b/
-├── Dockerfile                # Base image for SageMaker training
-├── build_and_push_ecr.ps1    # Example script to push the image to ECR
-├── requirements.txt          # Python dependencies
-├── train_mamba.py            # Main training script executed in SageMaker
-├── accelerate_config.yaml    # HuggingFace Accelerate configuration
+YunMin-mamba-training/
+├── Dockerfile                      # Base image for SageMaker training
+├── build_and_push_ecr.ps1          # Example script to push the image to ECR
+├── requirements.txt                # Python dependencies
+├── train_mamba.py                  # Main training script executed in SageMaker
+├── accelerate_config.yaml          # HuggingFace Accelerate configuration
+├── deepspeed_config.json           # DeepSpeed configuration
+├── sagemaker_training_job.py       # Launch standard SageMaker training
+├── sagemaker_spot_training_job.py  # Launch Spot training job
+├── example.env                     # Environment variable template
 ├── configs/
-│   └── mamba_config.json     # Model configuration (configs/mamba_config.json)
-├── deepspeed_config.json     # Deepspeed configuration
-├── sagemaker_training_job.py # Launch standard SageMaker training
-├── sagemaker_spot_training_job.py # Launch Spot training job
-├── README_SAGEMAKER.md       # Detailed SageMaker instructions
+│   ├── mamba_3b.json               # 3B model configuration
+│   └── mamba_7b.json               # 7B model configuration
+├── tests/
+│   └── test_imports.py             # Simple import test
+├── .github/workflows/
+│   └── python-tests.yml            # CI workflow
+├── README_SAGEMAKER.md             # Detailed SageMaker instructions
 └── architecture.md
 ```
+
+Set the `MODEL_CONFIG_PATH` environment variable to point to either
+`configs/mamba_3b.json` or `configs/mamba_7b.json` to choose which model size
+to train.
 
 ## Model Architecture
 
