@@ -29,3 +29,11 @@ def test_compile_sagemaker_launcher():
         doraise=True,
     )
 
+
+def test_parse_dockerfile():
+    """Basic syntax check for the Dockerfile using dockerfile-parse"""
+    from dockerfile_parse import DockerfileParser
+    dockerfile_path = Path(__file__).resolve().parents[1] / "Dockerfile"
+    parser = DockerfileParser(str(dockerfile_path))
+    assert parser.baseimage is not None
+
