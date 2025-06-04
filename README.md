@@ -29,12 +29,12 @@ YunMin-mamba-training/
 ```
 
 Set the `MODEL_CONFIG_PATH` environment variable to point to either
-`configs/mamba_config.json` or `configs/mamba_7b_config.json` to choose which model size
+`configs/mamba_3b_config.json` or `configs/mamba_7b_config.json` to choose which model size
 to train.
 
 ## Model Architecture
 
-The configuration file `configs/mamba_config.json` defines the 3B model with 36 layers and a hidden size of 2,560.  A larger 7B variant is provided in `configs/mamba_7b_config.json` with 32 layers and a hidden size of 4,096.  Gradient checkpointing and DeepSpeed ZeRO Stage 2 are enabled during training to keep GPU memory usage manageable.  See [architecture.md](architecture.md) for the original training plan.
+The configuration file `configs/mamba_config.json` defines the 3B model with 36 layers and a hidden size of 2,560.  A larger 7B variant is provided in `configs/mamba_7b_config.json` with 32 layers and a hidden size of 4,096.  Gradient checkpointing and DeepSpeed ZeRO Stage 2 are enabled during training to keep GPU memory usage manageable.  See [architecture.md](architecture.md) for a summary of the training plan.
 
 ## Dataset Layout
 
