@@ -38,13 +38,17 @@ RUN pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url h
 
 # 3) Install base deps
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir mamba-ssm==2.2.4 transformers==4.40.2
 
 # 4) Create necessary directories
 RUN mkdir -p /app/logs /app/checkpoints /app/configs
 
-# 6) Verify installation
+# 5) Verify installation
 RUN python -c "import torch; print('✅ PyTorch imported successfully')"
-
+RUN python - <<'PY'
+from transformers import MambaLMHeadModel
+print('✅ MambaLMHeadModel imported successfully')
+PY
 # ========= Accelerate configuration =========
 RUN mkdir -p "/root/.cache/huggingface/accelerate"
 COPY accelerate_config.yaml /root/.cache/huggingface/accelerate/default_config.yaml
@@ -66,6 +70,16 @@ WORKDIR /app
 
 # ========= CUDA availability test =========
 RUN python -c "import torch; print('✅ CUDA available:', torch.cuda.is_available()); print('🔢 CUDA version:', torch.version.cuda)"
+
+# ========= Test MambaLMHeadModel =========
+RUN python - <<'PY'
+import json
+from pathlib import Path
+from transformers import MambaLMHeadModel, MambaConfig
+cfg = json.load(open(Path('/app/configs/mamba_config.json')))
+model = MambaLMHeadModel(MambaConfig(**cfg))
+print('✅ MambaLMHeadModel instantiated successfully')
+PY
 
 # ========= SageMaker entrypoint =========
 ENV SAGEMAKER_PROGRAM=train_mamba.py
