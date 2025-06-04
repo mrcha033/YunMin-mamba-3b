@@ -20,3 +20,4 @@ def test_train_mamba_parses_model_config():
     )
     assert result.returncode == 0
     assert "model-config-path" in result.stdout
+    assert "dataset-path" in result.stdout

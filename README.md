@@ -101,6 +101,11 @@ includes dataset paths, S3 output locations and common hyperparameters such as
    ```
 
    The script creates a training job using Spot instances and resumes from the latest checkpoint when interrupted.
+   You can also run the training script directly and override the dataset directory:
+
+   ```bash
+   python src/train_mamba.py --dataset-path /path/to/data
+   ```
 
 For additional configuration options and dataset layout, see [README_SAGEMAKER.md](README_SAGEMAKER.md).
 
