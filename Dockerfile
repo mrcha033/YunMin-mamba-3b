@@ -54,15 +54,11 @@ RUN mkdir -p "/root/.cache/huggingface/accelerate"
 COPY accelerate_config.yaml /root/.cache/huggingface/accelerate/default_config.yaml
 COPY deepspeed_config.json /app/deepspeed_config.json
 
-# ========= Create mamba config =========
-COPY mamba_config.json /app/mamba_config.json
+# ========= Model config =========
+COPY configs/mamba_config.json /app/configs/mamba_config.json
 
 # ========= Training script =========
 COPY train_mamba.py /app/train_mamba.py
-
-# ========= Create SageMaker train script =========
-RUN echo '#!/bin/bash\ncd /app\nexec python train_mamba.py "$@"' > /usr/local/bin/train && \
-    chmod +x /usr/local/bin/train
 
 # ========= Port and working directory =========
 EXPOSE 6006
@@ -76,7 +72,7 @@ RUN python - <<'PY'
 import json
 from pathlib import Path
 from transformers import MambaLMHeadModel, MambaConfig
-cfg = json.load(open(Path('/app/mamba_config.json')))
+cfg = json.load(open(Path('/app/configs/mamba_config.json')))
 model = MambaLMHeadModel(MambaConfig(**cfg))
 print('✅ MambaLMHeadModel instantiated successfully')
 PY
