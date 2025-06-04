@@ -54,8 +54,8 @@ RUN mkdir -p "/root/.cache/huggingface/accelerate"
 COPY accelerate_config.yaml /root/.cache/huggingface/accelerate/default_config.yaml
 COPY deepspeed_config.json /app/deepspeed_config.json
 
-# ========= Create mamba config =========
-COPY configs/mamba_config.json /app/configs/mamba_config.json
+# ========= Copy configuration files =========
+COPY configs/ /app/configs/
 
 # ========= Training script =========
 COPY train_mamba.py /app/train_mamba.py
