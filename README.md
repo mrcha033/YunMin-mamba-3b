@@ -52,6 +52,13 @@ s3://your-bucket/yunmin-mamba-data/dataset/tagged/
 └── social_media_data/
 ```
 
+## Dataset Usage and Licensing
+
+You are responsible for ensuring that you have the right to use any dataset
+referenced by this project. Consider privacy, bias and other ethical issues
+before training on third-party data. The maintainers provide **no warranty**
+regarding the licenses or terms that may apply to these datasets.
+
 For a full walkthrough in Korean, refer to [README_SAGEMAKER.md](README_SAGEMAKER.md).
 
 ## Dataset Usage Notice
