@@ -39,15 +39,11 @@ RUN pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url h
 # 3) Install base deps
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 4) Copy simple mamba implementation
-COPY mamba_simple.py /app/
-
-# 5) Create necessary directories
+# 4) Create necessary directories
 RUN mkdir -p /app/logs /app/checkpoints /app/configs
 
 # 6) Verify installation
 RUN python -c "import torch; print('✅ PyTorch imported successfully')"
-RUN python -c "import sys; sys.path.append('/app'); from mamba_simple import Mamba; print('✅ Mamba imported successfully')"
 
 # ========= Accelerate configuration =========
 RUN mkdir -p "/root/.cache/huggingface/accelerate"
@@ -70,9 +66,6 @@ WORKDIR /app
 
 # ========= CUDA availability test =========
 RUN python -c "import torch; print('✅ CUDA available:', torch.cuda.is_available()); print('🔢 CUDA version:', torch.version.cuda)"
-
-# ========= Test SimpleMambaLM =========
-RUN python -c "import sys; sys.path.append('/app'); from train_mamba import SimpleMambaLM; print('✅ SimpleMambaLM imported successfully')"
 
 # ========= SageMaker entrypoint =========
 ENV SAGEMAKER_PROGRAM=train_mamba.py
