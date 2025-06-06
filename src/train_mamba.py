@@ -144,7 +144,7 @@ def train_on_category(accelerator, model, tokenizer, category_dataset, category,
     logger.info(f"🚀 Starting training on {category}...")
     
     # DeepSpeed handles gradient accumulation automatically
-    logger.info(f"Training config: batch_size={batch_size}, using DeepSpeed ZeRO Stage 2")
+    logger.info(f"Training config: batch_size={batch_size}, using DeepSpeed ZeRO Stage 3")
     
     # Create DataLoader for this category
     train_dataloader = DataLoader(
@@ -486,7 +486,7 @@ def main():
         logger.info("📂 No checkpoint directory found - starting fresh training")
     
     logger.info(f"Hyperparameters: lr={learning_rate}, batch_size={batch_size}, max_seq_length={max_seq_length}, save_steps={save_steps}")
-    logger.info(f"🔧 Using DeepSpeed ZeRO Stage 2 with optimizer offloading for memory efficiency")
+    logger.info(f"🔧 Using DeepSpeed ZeRO Stage 3 with optimizer offloading for memory efficiency")
     
     if resume_from_checkpoint and os.path.exists(resume_from_checkpoint):
         logger.info(f"🔄 Found checkpoint at {resume_from_checkpoint}. Will load after initialization")
