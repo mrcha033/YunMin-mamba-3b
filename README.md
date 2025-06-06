@@ -143,9 +143,10 @@ pytest
 
 ## Documentation
 
-Additional usage notes and a detailed walkthrough of the SageMaker workflow are available in:
+Additional usage notes and a detailed walkthrough of the SageMaker workflow are available in the following documents:
 
 - [README_SAGEMAKER.md](README_SAGEMAKER.md) – Korean quick start and troubleshooting guide
+- [architecture.md](architecture.md) – brief English overview of the training architecture
 
 ## License
 
