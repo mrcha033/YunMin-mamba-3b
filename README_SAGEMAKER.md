@@ -8,6 +8,7 @@
 - **Tokenizer**: YunMin-tokenizer-96k (96,000 vocab size)
 - **Training**: Multi-category curriculum learning
 - **Platform**: Amazon SageMaker Training Jobs
+- For an English summary of this setup, see [architecture.md](architecture.md).
 
 ## 📂 Project Structure
 
